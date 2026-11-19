@@ -1,13 +1,12 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
-import { Linking, Pressable, ScrollView, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Linking, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, ProBadge, Row, T } from '@/components/ui';
 import { percent } from '@/lib/format';
 import { useTranslation } from '@/lib/i18n';
-import { type Feature, FEATURES, PLANS, purchase, restorePurchases, usePurchaseState, yearlySavings } from '@/lib/premium';
-import { useStore } from '@/lib/store';
+import { type Feature, FEATURES, loadPlans, purchase, restorePurchases, usePurchaseState, yearlySavings } from '@/lib/premium';
 import { radius, useTheme } from '@/lib/theme';
 import { toast } from '@/lib/uiState';
 
@@ -18,10 +17,11 @@ export default function Paywall() {
   const { t } = useTranslation();
   const { feature } = useLocalSearchParams<{ feature?: Feature }>();
   const [plan, setPlan] = useState<'yearly' | 'monthly'>('yearly');
-  const busy = usePurchaseState((s) => s.busy);
-  const trialAvailable = !useStore((s) => s.settings.premium.trialUsed);
+  const { busy, plans, loading, error } = usePurchaseState();
+  useEffect(() => { loadPlans(); }, []);
   const list = [...FEATURES].sort((a, b) => (a.id === feature ? -1 : b.id === feature ? 1 : 0));
-  const selected = PLANS.find((p) => p.id === plan)!;
+  const selected = plans.find((p) => p.id === plan) ?? plans[0];
+  const trialAvailable = !!selected?.trial;
   const period = t(plan === 'yearly' ? 'year' : 'month');
 
   const buy = async () => {
@@ -33,7 +33,7 @@ export default function Paywall() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.forestDeep }}>
-      <View style={{ position: 'absolute', right: -100, top: -120, width: 360, height: 360, borderRadius: 180, backgroundColor: '#CF5F3B', opacity: 0.35 }} />
+      <View style={{ position: 'absolute', right: -100, top: -120, width: 360, height: 360, borderRadius: 180, backgroundColor: '#CF5F3B', opacity: 0.14 }} />
       <SafeAreaView style={{ flex: 1 }}>
         <Row style={{ justifyContent: 'flex-end', paddingHorizontal: 18 }}>
           <Pressable onPress={() => router.back()} accessibilityRole="button" accessibilityLabel={t('Close')} hitSlop={10}
@@ -64,7 +64,10 @@ export default function Paywall() {
             <Ionicons name="lock-open" size={18} color={c.gold} />
             <T variant="sub" color={c.cream} style={{ flex: 1 }}>{t('Our promise: your records are never locked. Everything you enter stays viewable and exportable for free, even if you cancel.')}</T>
           </Row>
-          {PLANS.map((p) => {
+          {loading && <ActivityIndicator color={c.cream} />}
+          {!loading && plans.length === 0 && <T color="#F6F0E4B3" center>{t('Subscriptions are currently unavailable.')}</T>}
+          {!!error && <T variant="caption" color={c.gold} center>{error}</T>}
+          {plans.map((p) => {
             const isSel = p.id === plan;
             return (
               <Pressable key={p.id} onPress={() => setPlan(p.id)} accessibilityRole="radio" accessibilityState={{ checked: isSel }}
@@ -75,9 +78,9 @@ export default function Paywall() {
                   <Row gap={8}>
                     <T variant="headline" color={c.cream}>{t(p.id === 'yearly' ? 'Yearly' : 'Monthly')}</T>
                     {p.id === 'yearly' && <View style={{ backgroundColor: c.gold, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 2 }}>
-                      <T variant="caption" color={c.forestDeep} style={{ fontSize: 11 }}>{t('Save {{a}}', { a: percent(yearlySavings()) })}</T></View>}
+                      <T variant="caption" color={c.forestDeep} style={{ fontSize: 11 }}>{t('Save {{a}}', { a: percent(yearlySavings(plans)) })}</T></View>}
                   </Row>
-                  {trialAvailable && <T variant="caption" color="#F6F0E4A6">{t('{{a}} free trial', { a: t('3 days') })}</T>}
+                  {!!p.trial && <T variant="caption" color="#F6F0E4A6">{t('{{a}} free trial', { a: p.trial })}</T>}
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
                   <T variant="number" color={c.cream} style={{ fontSize: 17 }}>{p.display}</T>
@@ -86,10 +89,10 @@ export default function Paywall() {
               </Pressable>
             );
           })}
-          <Button variant="light" disabled={busy} title={busy ? '…' : t(trialAvailable ? 'Start free trial' : 'Continue')} onPress={buy} />
+          <Button variant="light" disabled={busy || !selected} title={busy ? '…' : t(trialAvailable ? 'Start free trial' : 'Continue')} onPress={buy} />
           <T variant="caption" color="#F6F0E48C" center>
-            {trialAvailable
-              ? t('{{a}} free, then {{b}} per {{c}}. Renews automatically until cancelled in Settings at least 24 hours before the end of the period.', { a: t('3 days'), b: selected.display, c: period })
+            {!selected ? '' : trialAvailable
+              ? t('{{a}} free, then {{b}} per {{c}}. Renews automatically until cancelled in Settings at least 24 hours before the end of the period.', { a: selected.trial!, b: selected.display, c: period })
               : t('{{a}} per {{b}}. Renews automatically until cancelled in Settings at least 24 hours before the end of the period.', { a: selected.display, b: period })}
           </T>
           <T variant="caption" color="#F6F0E48C" center>{t('Payment is charged to your Apple ID at confirmation of purchase. Manage or cancel any time in your App Store account settings.')}</T>

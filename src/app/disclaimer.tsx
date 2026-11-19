@@ -16,6 +16,7 @@ export const DISCLAIMER_POINTS = [
   'Always ask a qualified veterinarian before making decisions about your pet’s health, food, medication or travel. In an emergency, contact a vet immediately.',
   'You are responsible for the information you enter and for checking anything the app fills in for you, such as scanned reports.',
   'To the extent permitted by law, PetTrack accepts no liability for decisions or actions based on the app.',
+  'There is zero tolerance for offensive or abusive content on public pages and messages. By continuing you agree to the Terms of Use.',
 ];
 
 /** Shown once before first use (and any time from Settings). */

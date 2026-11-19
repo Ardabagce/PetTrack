@@ -385,3 +385,18 @@ T.update({
 "Light": ("Claro", "Hell", "Clair", "Licht"),
 "Dark": ("Oscuro", "Dunkel", "Sombre", "Donker"),
 })
+
+T.update({
+"Block sender": ("Bloquear remitente", "Absender blockieren", "Bloquer l'expéditeur", "Afzender blokkeren"),
+"Block": ("Bloquear", "Blockieren", "Bloquer", "Blokkeren"),
+"Sender blocked": ("Remitente bloqueado", "Absender blockiert", "Expéditeur bloqué", "Afzender geblokkeerd"),
+"Their messages are deleted and you will not receive new ones from them.": ("Sus mensajes se eliminan y no recibirás nuevos.", "Die Nachrichten werden gelöscht und du erhältst keine neuen mehr.", "Ses messages sont supprimés et vous n'en recevrez plus.", "Hun berichten worden verwijderd en je ontvangt er geen nieuwe meer van."),
+"Links and offensive words are not allowed on public pages. Visitors can report a page.": ("No se permiten enlaces ni palabras ofensivas en páginas públicas. Los visitantes pueden denunciar una página.", "Links und beleidigende Wörter sind auf öffentlichen Seiten nicht erlaubt. Besucher können eine Seite melden.", "Les liens et mots offensants sont interdits sur les pages publiques. Les visiteurs peuvent signaler une page.", "Links en beledigende woorden zijn niet toegestaan op openbare pagina's. Bezoekers kunnen een pagina melden."),
+"There is zero tolerance for offensive or abusive content on public pages and messages. By continuing you agree to the Terms of Use.": ("No toleramos contenido ofensivo o abusivo en páginas públicas ni mensajes. Al continuar aceptas las Condiciones de uso.", "Beleidigende oder missbräuchliche Inhalte auf öffentlichen Seiten und in Nachrichten werden nicht toleriert. Wenn du fortfährst, stimmst du den Nutzungsbedingungen zu.", "Aucune tolérance pour les contenus offensants ou abusifs sur les pages publiques et les messages. En continuant, vous acceptez les conditions d'utilisation.", "Er is nultolerantie voor beledigende of misbruikende inhoud op openbare pagina's en in berichten. Door verder te gaan ga je akkoord met de gebruiksvoorwaarden."),
+})
+
+T.update({
+"{{a}} weeks": ("{{a}} semanas", "{{a}} Wochen", "{{a}} semaines", "{{a}} weken"),
+"{{a}} months": ("{{a}} meses", "{{a}} Monate", "{{a}} mois", "{{a}} maanden"),
+"{{a}} years": ("{{a}} años", "{{a}} Jahre", "{{a}} ans", "{{a}} jaar"),
+})

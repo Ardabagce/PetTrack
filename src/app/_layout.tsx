@@ -12,6 +12,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { HtmlPreview } from '@/components/extras';
 import { T } from '@/components/ui';
 import { syncHousehold } from '@/lib/actions';
+import { initPurchases } from '@/lib/premium';
 import i18n from '@/lib/i18n';
 import { useStore } from '@/lib/store';
 import { fonts, useTheme } from '@/lib/theme';
@@ -41,6 +42,7 @@ export default function RootLayout() {
   useEffect(() => {
     const sub = AppState.addEventListener('change', (s) => { if (s === 'active') syncHousehold().catch(() => {}); });
     syncHousehold().catch(() => {});
+    initPurchases();
     return () => sub.remove();
   }, []);
 

@@ -18,16 +18,21 @@
 4. **Travel requirements.** Entry rules are set by authorities (e.g. USDA APHIS, CDC, EU, UK) and airlines and change
    without notice. The travel checklist is a planning aid only; verify every requirement with official sources.
 5. **Collar tag & lost-pet pages.** Information you publish on a collar-tag page is visible to anyone with the link or
-   QR code. Do not publish information you do not want to share. We may remove content that is unlawful or abusive.
-6. **Subscriptions.** Premium is an auto-renewing subscription billed through your Apple ID. Payment is charged at
+   QR code. Do not publish information you do not want to share.
+6. **Acceptable use – zero tolerance.** There is no tolerance for objectionable or abusive content or users. You may not
+   publish or send content that is offensive, hateful, harassing, sexual, illegal, spam or that shares someone else's
+   private information. Links and offensive words are filtered. Anyone can report a public page; we review reports
+   within 24 hours, remove violating content and may block the device responsible. Pet owners can delete messages and
+   block senders in the app. Report concerns to the contact address on the Support page.
+7. **Subscriptions.** Premium is an auto-renewing subscription billed through your Apple ID. Payment is charged at
    confirmation of purchase. It renews automatically unless cancelled at least 24 hours before the end of the current
    period. Manage or cancel in your App Store account settings. Any unused part of a free trial is forfeited when you
    purchase a subscription. Your records stay viewable and exportable even if you cancel.
-7. **Limitation of liability.** To the maximum extent permitted by law, PetTrack and its developers are not liable for
+8. **Limitation of liability.** To the maximum extent permitted by law, PetTrack and its developers are not liable for
    any direct or indirect damage, loss, injury, illness or death of any animal or person, or any cost arising from use
    of, or inability to use, the app or reliance on its content. Nothing in these terms excludes liability that cannot
    be excluded by law (including mandatory consumer rights in the EU).
-8. **Apple.** These terms are between you and the developer, not Apple. Apple's Standard EULA applies in addition.
+9. **Apple.** These terms are between you and the developer, not Apple. Apple's Standard EULA applies in addition.
 
 ## Privacy Policy
 

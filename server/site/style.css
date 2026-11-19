@@ -7,7 +7,7 @@ a{color:inherit}
 .wrap{max-width:1120px;margin:0 auto;padding:0 max(20px,env(safe-area-inset-left))}
 nav{display:flex;align-items:center;justify-content:space-between;padding:20px 0}
 .logo{display:flex;align-items:center;gap:10px;font:600 22px var(--display);text-decoration:none}
-.logo i{width:34px;height:34px;border-radius:11px;background:var(--accent);display:grid;place-items:center;font-style:normal;color:#fff;font-size:18px}
+.logo img{display:block}
 nav .links{display:flex;gap:22px;font-size:15px}nav .links a{text-decoration:none;color:var(--ink2)}nav .links a:hover{color:var(--ink)}
 h1,h2,h3{font-family:var(--display);font-weight:600;line-height:1.08;margin:0;text-wrap:balance}
 h1{font-size:clamp(42px,6.4vw,76px);letter-spacing:-.02em}h2{font-size:clamp(32px,4.4vw,50px);letter-spacing:-.01em}h3{font-size:24px}

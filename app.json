@@ -58,7 +58,8 @@
       "package": "com.pettrack.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundColor": "#1D3529"
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "permissions": [
         "android.permission.RECORD_AUDIO"
@@ -92,6 +93,19 @@
         {
           "photosPermission": "PetTrack lets you pick photos of your pet and of vet reports.",
           "cameraPermission": "PetTrack uses the camera to scan vet reports and to photograph your pet and symptoms."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 180,
+          "resizeMode": "contain",
+          "backgroundColor": "#F4EFE7",
+          "dark": {
+            "image": "./assets/splash-icon-dark.png",
+            "backgroundColor": "#0E1311"
+          }
         }
       ]
     ],

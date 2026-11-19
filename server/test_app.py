@@ -1,5 +1,6 @@
 import os, tempfile
 os.environ["DATA_DIR"] = tempfile.mkdtemp()
+os.environ["ADMIN_TOKEN"] = "admintest"
 from fastapi.testclient import TestClient
 from app import app
 
@@ -49,3 +50,21 @@ def test_site_pages():
         r = client.get(path)
         assert r.status_code == 200 and "PetTrack" in r.text and "{{" not in r.text
     assert client.get("/site/style.css").status_code == 200
+
+def test_moderation():
+    owner = token()
+    slug = client.put("/api/pets/pm/public", json={"name": "Max", "species": "dog"}, headers=owner).json()["slug"]
+    assert client.put("/api/pets/pm/public", json={"name": "Max", "species": "dog", "emergencyNotes": "visit www.spam.com"}, headers=owner).status_code == 422
+    assert client.post(f"/p/{slug}/message", data={"message": "you are a bitch"}).status_code == 422
+    client.post(f"/p/{slug}/message", data={"message": "Found him near the park"})
+    msgs = client.get("/api/pets/pm/messages", headers=owner).json()["messages"]
+    assert len(msgs) == 1
+    assert client.post(f"/api/pets/pm/messages/{msgs[0]['id']}/block", headers=owner).json() == {"blocked": True}
+    client.post(f"/p/{slug}/message", data={"message": "again"})
+    assert client.get("/api/pets/pm/messages", headers=owner).json()["messages"] == []
+    assert client.post(f"/p/{slug}/report", data={"reason": "spam", "details": "x"}).status_code == 200
+    assert client.get("/admin/reports").status_code == 404
+    reports = client.get("/admin/reports", headers={"X-Admin-Token": "admintest"}).json()["reports"]
+    assert reports[0]["slug"] == slug
+    client.post(f"/admin/pages/{slug}/disable", headers={"X-Admin-Token": "admintest"})
+    assert client.get(f"/p/{slug}").status_code == 404

@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { SvgXml } from 'react-native-svg';
-import { Banner, Button, Card, Field, FormSection, Row, Screen, T, ToggleRow } from '@/components/ui';
+import { Banner, Button, Card, Field, FormSection, Row, Screen, T, ToggleRow, useConfirm } from '@/components/ui';
 import { api, hasBackend, publicProfileUrl } from '@/lib/api';
 import { formatDateTime } from '@/lib/format';
 import { useTranslation } from '@/lib/i18n';
@@ -23,6 +23,7 @@ export default function Lost() {
   const { pet } = useSelectedPet();
   const [qr, setQr] = useState('');
   const [messages, setMessages] = useState<FinderMessage[]>([]);
+  const { ask, dialog } = useConfirm();
   const [lost, setLost] = useState<LostMode>(pet?.lost ?? { active: false, since: new Date().toISOString(), lastSeen: '', message: '', reward: '', contactPhone: '' });
   const slug = pet?.publicSlug ?? '';
   const url = publicProfileUrl(slug || 'demo');
@@ -70,6 +71,7 @@ export default function Lost() {
 
   return (
     <Screen title={t('Collar QR tag')}>
+      {dialog}
       {!hasBackend() && <Banner icon="cloud-offline-outline" tint={c.sky} text={t('Preview mode: the QR page goes live once the PetTrack server is connected.')} />}
       <Card style={{ alignItems: 'center' }}>
         <View style={{ backgroundColor: '#fff', borderRadius: radius.medium, padding: 12, opacity: slug || !hasBackend() ? 1 : 0.25 }}>
@@ -86,6 +88,7 @@ export default function Lost() {
             </Row>
           )}
         <T variant="sub" center>{t('The page shows name, photo, allergies, medical notes and how to reach you – never your address.')}</T>
+        <T variant="caption" center>{t('Links and offensive words are not allowed on public pages. Visitors can report a page.')}</T>
       </Card>
 
       <FormSection title={t('Lost pet mode')}>
@@ -107,6 +110,17 @@ export default function Lost() {
               <Row gap={8}><Ionicons name="chatbubble" size={14} color={c.accent} /><T variant="headline" style={{ fontSize: 15 }}>{m.name || t('Someone')}</T><T variant="caption">{formatDateTime(m.createdAt)}</T></Row>
               <T>{m.message}</T>
               {!!m.phone && <T variant="number" color={c.accent}>{m.phone}</T>}
+              <Row gap={8}>
+                <Button small variant="soft" tint={c.ink2} icon="trash-outline" title={t('Delete')} onPress={async () => {
+                  try { await api(`/api/pets/${pet.id}/messages/${m.id}`, { method: 'DELETE' }); setMessages((x) => x.filter((y) => y.id !== m.id)); } catch (e) { toast((e as Error).message); }
+                }} />
+                <Button small variant="soft" tint={c.danger} icon="hand-left-outline" title={t('Block sender')} onPress={() => ask({
+                  title: t('Block sender'), message: t('Their messages are deleted and you will not receive new ones from them.'), confirm: t('Block'), destructive: true,
+                  onConfirm: async () => {
+                    try { await api(`/api/pets/${pet.id}/messages/${m.id}/block`, { method: 'POST' }); setMessages((x) => x.filter((y) => y.id !== m.id)); toast(t('Sender blocked')); } catch (e) { toast((e as Error).message); }
+                  },
+                })} />
+              </Row>
             </View>
           ))}
         </FormSection>

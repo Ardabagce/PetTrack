@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
 import { router } from 'expo-router';
@@ -8,7 +9,7 @@ import { Chip, Chips, EditorHeader, FormSection, ProBadge, Row, Screen, T, Toggl
 import { api, hasBackend } from '@/lib/api';
 import { formatDate } from '@/lib/format';
 import i18n, { deviceLanguage, LANGUAGES, useTranslation } from '@/lib/i18n';
-import { setSimulatedPremium } from '@/lib/premium';
+import { manageSubscription, setSimulatedPremium } from '@/lib/premium';
 import { loadDemoData } from '@/lib/sample';
 import { usePremium } from '@/lib/selectors';
 import { getState, useStore } from '@/lib/store';
@@ -59,10 +60,13 @@ export default function Settings() {
             <Ionicons name="checkmark-circle" size={28} color={c.sage} />
             <View style={{ flex: 1 }}>
               <T variant="headline">PetTrack Premium</T>
-              <T variant="caption">{settings.premium.trialEndsAt && !settings.premium.plan
+              <T variant="caption">{settings.premium.trialEndsAt
                 ? t('Free trial until {{a}}', { a: formatDate(settings.premium.trialEndsAt) }) : t('All features unlocked')}</T>
             </View>
           </Row>
+        ) : null}
+        {premium ? (
+          <NavRow icon="card-outline" label={t('Manage subscription')} onPress={manageSubscription} />
         ) : (
           <NavRow icon="sparkles" label={t('Upgrade to Premium')} onPress={() => router.push('/paywall')} right={<ProBadge />} />
         )}
@@ -122,7 +126,7 @@ export default function Settings() {
         <Row style={{ justifyContent: 'space-between' }}><T variant="sub">{t('Server')}</T><T variant="caption">{hasBackend() ? t('Connected') : t('Offline mode')}</T></Row>
       </FormSection>
 
-      {(__DEV__ || Platform.OS === 'web') && (
+      {(__DEV__ || Platform.OS === 'web' || Constants.executionEnvironment === 'storeClient') && (
       <FormSection title={t('Testing')} footer={t('Only for testing before the App Store release.')}>
         <ToggleRow label={t('Simulate Premium')} value={premium} onChange={setSimulatedPremium} />
         <NavRow icon="flask-outline" label={t('Load demo data')} onPress={() => ask({

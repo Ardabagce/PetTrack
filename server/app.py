@@ -11,6 +11,8 @@ Storage: one SQLite file in DATA_DIR (mount a persistent volume there).
 from __future__ import annotations
 
 import base64
+import hashlib
+import re
 import html
 import io
 import json
@@ -47,6 +49,8 @@ CREATE TABLE IF NOT EXISTS events (
 CREATE INDEX IF NOT EXISTS events_code_date ON events (code, date);
 CREATE TABLE IF NOT EXISTS public_pets (pet_id TEXT PRIMARY KEY, slug TEXT UNIQUE NOT NULL, owner TEXT NOT NULL, data TEXT NOT NULL, updated_at REAL NOT NULL);
 CREATE TABLE IF NOT EXISTS messages (id TEXT PRIMARY KEY, pet_id TEXT NOT NULL, name TEXT, phone TEXT, message TEXT NOT NULL, created_at REAL NOT NULL);
+CREATE TABLE IF NOT EXISTS blocks (pet_id TEXT NOT NULL, sender TEXT NOT NULL, PRIMARY KEY (pet_id, sender));
+CREATE TABLE IF NOT EXISTS reports (id TEXT PRIMARY KEY, slug TEXT NOT NULL, reason TEXT NOT NULL, details TEXT, sender TEXT, created_at REAL NOT NULL);
 """
 
 
@@ -64,6 +68,41 @@ def db():
 
 with db() as _c:
     _c.executescript(SCHEMA)
+    # Migrations for databases created by earlier versions.
+    for table, column in (("messages", "sender TEXT"), ("public_pets", "disabled INTEGER DEFAULT 0")):
+        try:
+            _c.execute(f"ALTER TABLE {table} ADD COLUMN {column}")
+        except sqlite3.OperationalError:
+            pass
+
+SALT = os.environ.get("HASH_SALT", "pettrack")
+
+
+def sender_id(request: Request) -> str:
+    """Pseudonymous sender id (hashed IP) used only for blocking and rate limiting."""
+    ip = request.headers.get("x-forwarded-for", "").split(",")[0].strip() or (request.client.host if request.client else "?")
+    return hashlib.sha256(f"{SALT}:{ip}".encode()).hexdigest()[:24]
+
+
+# Objectionable-content filter for public pages and finder messages (App Store guideline 1.2).
+BLOCKED_WORDS = {
+    "fuck", "shit", "bitch", "cunt", "nigger", "faggot", "whore", "slut", "retard",
+    "puta", "mierda", "cabrón", "maricón", "gilipollas",
+    "scheiße", "scheisse", "fotze", "hurensohn", "wichser", "schlampe",
+    "merde", "putain", "salope", "connard", "enculé",
+    "kut", "klootzak", "hoer", "tering", "kanker",
+}
+URL_RE = re.compile(r"(https?://|www\.|\b[a-z0-9-]+\.(?:com|net|org|io|ru|xyz|top|info)\b)", re.I)
+
+
+def objectionable(*texts: str | None) -> bool:
+    for text in texts:
+        if not text:
+            continue
+        words = set(re.findall(r"[\w']+", text.lower()))
+        if words & BLOCKED_WORDS or URL_RE.search(text):
+            return True
+    return False
 
 
 def device(authorization: str = Header(default="")) -> str:
@@ -241,12 +280,17 @@ class PublicPetIn(BaseModel):
 def publish_pet(pet_id: str, body: PublicPetIn, token: str = Depends(device)) -> dict[str, str]:
     if body.photo and not body.photo.startswith("data:image/"):
         body.photo = None
+    lost = body.lost
+    if objectionable(body.name, body.breed, body.allergies, body.conditions, body.emergencyNotes, body.vetClinic,
+                     lost.lastSeen if lost else None, lost.message if lost else None, lost.reward if lost else None):
+        raise HTTPException(422, "Please remove links or offensive words from the public page.")
     with db() as c:
         row = c.execute("SELECT slug, owner FROM public_pets WHERE pet_id = ?", (pet_id,)).fetchone()
         if row and row["owner"] != token:
             raise HTTPException(403, "Not your pet")
         slug = row["slug"] if row else secrets.token_urlsafe(6).replace("-", "x").replace("_", "y")
-        c.execute("INSERT OR REPLACE INTO public_pets VALUES (?, ?, ?, ?, ?)", (pet_id, slug, token, body.model_dump_json(), time.time()))
+        c.execute("INSERT OR REPLACE INTO public_pets (pet_id, slug, owner, data, updated_at, disabled) VALUES (?, ?, ?, ?, ?, COALESCE((SELECT disabled FROM public_pets WHERE pet_id = ?), 0))",
+                  (pet_id, slug, token, body.model_dump_json(), time.time(), pet_id))
     return {"slug": slug}
 
 
@@ -259,6 +303,36 @@ def pet_messages(pet_id: str, token: str = Depends(device)) -> dict[str, Any]:
         rows = c.execute("SELECT * FROM messages WHERE pet_id = ? ORDER BY created_at DESC LIMIT 50", (pet_id,)).fetchall()
     return {"messages": [{"id": r["id"], "name": r["name"], "phone": r["phone"], "message": r["message"],
                           "createdAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(r["created_at"]))} for r in rows]}
+
+
+def owned_message(c: sqlite3.Connection, pet_id: str, message_id: str, token: str) -> sqlite3.Row:
+    row = c.execute("SELECT owner FROM public_pets WHERE pet_id = ?", (pet_id,)).fetchone()
+    if not row or row["owner"] != token:
+        raise HTTPException(404, "Not found")
+    msg = c.execute("SELECT * FROM messages WHERE id = ? AND pet_id = ?", (message_id, pet_id)).fetchone()
+    if not msg:
+        raise HTTPException(404, "Not found")
+    return msg
+
+
+@app.delete("/api/pets/{pet_id}/messages/{message_id}")
+def delete_message(pet_id: str, message_id: str, token: str = Depends(device)) -> dict[str, bool]:
+    with db() as c:
+        owned_message(c, pet_id, message_id, token)
+        c.execute("DELETE FROM messages WHERE id = ?", (message_id,))
+    return {"deleted": True}
+
+
+@app.post("/api/pets/{pet_id}/messages/{message_id}/block")
+def block_sender(pet_id: str, message_id: str, token: str = Depends(device)) -> dict[str, bool]:
+    """Deletes the message and silently drops future messages from the same sender for this pet."""
+    with db() as c:
+        msg = owned_message(c, pet_id, message_id, token)
+        if msg["sender"]:
+            c.execute("INSERT OR IGNORE INTO blocks VALUES (?, ?)", (pet_id, msg["sender"]))
+            c.execute("DELETE FROM messages WHERE pet_id = ? AND sender = ?", (pet_id, msg["sender"]))
+        c.execute("DELETE FROM messages WHERE id = ?", (message_id,))
+    return {"blocked": True}
 
 
 _recent_posts: dict[str, list[float]] = {}
@@ -293,7 +367,7 @@ def esc(value: Any) -> str:
 @app.get("/p/{slug}", response_class=HTMLResponse)
 def public_page(slug: str) -> HTMLResponse:
     with db() as c:
-        row = c.execute("SELECT pet_id, data FROM public_pets WHERE slug = ?", (slug,)).fetchone()
+        row = c.execute("SELECT pet_id, data FROM public_pets WHERE slug = ? AND COALESCE(disabled, 0) = 0", (slug,)).fetchone()
     if not row:
         raise HTTPException(404, "Not found")
     p = json.loads(row["data"])
@@ -320,23 +394,76 @@ def public_page(slug: str) -> HTMLResponse:
     <input name="phone" placeholder="Your phone" maxlength="40"><textarea name="message" rows="3" placeholder="Where is the pet now?" required maxlength="600"></textarea>
     <button type="submit">Send to the owner</button></form></div>
     <p><small>The owner's address is never shown on this page. Information on this page is provided by the owner;
-    PetTrack does not verify it. In a medical emergency contact a veterinarian.</small></p></main></body></html>"""
+    PetTrack does not verify it. In a medical emergency contact a veterinarian.</small></p>
+    <p><small><a href="/p/{esc(slug)}/report">Report this page</a> · Contact: {esc(os.environ.get("CONTACT_EMAIL", ""))}</small></p></main></body></html>"""
     return HTMLResponse(page)
 
 
 @app.post("/p/{slug}/message", response_class=HTMLResponse)
 def finder_message(slug: str, request: Request, message: str = Form(..., max_length=600), name: str = Form("", max_length=60),
                    phone: str = Form("", max_length=40)) -> HTMLResponse:
-    ip = request.client.host if request.client else "?"
-    if rate_limited(ip):
+    sender = sender_id(request)
+    if rate_limited(sender):
         raise HTTPException(429, "Too many messages, please call instead.")
+    if objectionable(message, name):
+        return HTMLResponse(f"<!doctype html><meta name=viewport content='width=device-width'><style>{PAGE_CSS}</style><main><h1>Message not sent</h1>"
+                            f"<p>Please remove links or offensive words and try again.</p><a class=btn href='/p/{esc(slug)}'>Back</a></main>", status_code=422)
     with db() as c:
-        row = c.execute("SELECT pet_id FROM public_pets WHERE slug = ?", (slug,)).fetchone()
+        row = c.execute("SELECT pet_id FROM public_pets WHERE slug = ? AND COALESCE(disabled, 0) = 0", (slug,)).fetchone()
         if not row:
             raise HTTPException(404, "Not found")
-        c.execute("INSERT INTO messages VALUES (?, ?, ?, ?, ?, ?)", (secrets.token_hex(8), row["pet_id"], name, phone, message, time.time()))
+        blocked = c.execute("SELECT 1 FROM blocks WHERE pet_id = ? AND sender = ?", (row["pet_id"], sender)).fetchone()
+        if not blocked:
+            c.execute("INSERT INTO messages (id, pet_id, name, phone, message, created_at, sender) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                      (secrets.token_hex(8), row["pet_id"], name, phone, message, time.time(), sender))
     return HTMLResponse(f"<!doctype html><meta name=viewport content='width=device-width'><style>{PAGE_CSS}</style><main><h1>Thank you!</h1>"
                         f"<p>The owner has your message. If you left a number, they will call you.</p><a class=btn href='/p/{esc(slug)}'>Back</a></main>")
+
+
+REPORT_REASONS = {"spam": "Spam or scam", "offensive": "Offensive or abusive content", "fake": "Fake or misleading information",
+                  "privacy": "Shares someone's private information", "other": "Something else"}
+
+
+@app.get("/p/{slug}/report", response_class=HTMLResponse)
+def report_form(slug: str) -> HTMLResponse:
+    options = "".join(f'<label style="display:block;margin:8px 0"><input type="radio" name="reason" value="{k}" required> {v}</label>' for k, v in REPORT_REASONS.items())
+    return HTMLResponse(f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="robots" content="noindex"><title>Report · PetTrack</title><style>{PAGE_CSS}</style></head><body><main><h1 style="font-size:30px">Report this page</h1>
+    <form method="post" action="/p/{esc(slug)}/report" class="card">{options}<textarea name="details" rows="3" maxlength="600" placeholder="Details (optional)"></textarea>
+    <button type="submit">Send report</button></form><p><small>We review reports and remove content that breaks our terms.</small></p></main></body></html>""")
+
+
+@app.post("/p/{slug}/report", response_class=HTMLResponse)
+def report_page(slug: str, request: Request, reason: str = Form(...), details: str = Form("", max_length=600)) -> HTMLResponse:
+    if reason not in REPORT_REASONS:
+        raise HTTPException(422, "Unknown reason")
+    sender = sender_id(request)
+    if rate_limited("r:" + sender):
+        raise HTTPException(429, "Too many reports")
+    with db() as c:
+        c.execute("INSERT INTO reports VALUES (?, ?, ?, ?, ?, ?)", (secrets.token_hex(8), slug, reason, details, sender, time.time()))
+    return HTMLResponse(f"<!doctype html><meta name=viewport content='width=device-width'><style>{PAGE_CSS}</style><main><h1>Thank you</h1>"
+                        f"<p>We will review this page.</p><a class=btn href='/'>PetTrack</a></main>")
+
+
+def admin(x_admin_token: str = Header(default="")) -> None:
+    expected = os.environ.get("ADMIN_TOKEN", "")
+    if not expected or not secrets.compare_digest(x_admin_token, expected):
+        raise HTTPException(404, "Not found")
+
+
+@app.get("/admin/reports", dependencies=[Depends(admin)])
+def admin_reports() -> dict[str, Any]:
+    with db() as c:
+        rows = c.execute("SELECT r.*, p.disabled FROM reports r LEFT JOIN public_pets p ON p.slug = r.slug ORDER BY r.created_at DESC LIMIT 200").fetchall()
+    return {"reports": [dict(r) for r in rows]}
+
+
+@app.post("/admin/pages/{slug}/disable", dependencies=[Depends(admin)])
+def admin_disable(slug: str, disabled: bool = True) -> dict[str, bool]:
+    with db() as c:
+        c.execute("UPDATE public_pets SET disabled = ? WHERE slug = ?", (1 if disabled else 0, slug))
+    return {"disabled": disabled}
 
 
 # ---------------------------------------------------------------- OCR
