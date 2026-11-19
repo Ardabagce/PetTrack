@@ -61,8 +61,8 @@ cd server && pip install -r requirements.txt pytest httpx && pytest
 
 ## Backend on Coolify
 
-1. New resource → your GitHub repo → build pack **Dockerfile**. Base Directory `/`, Dockerfile Location `/Dockerfile`
-   (or Base Directory `/server` with `/Dockerfile` there – both work).
+1. New resource → your GitHub repo → build pack **Dockerfile**. Base Directory `/` (repo root),
+   Dockerfile Location `/Dockerfile` or `/server/Dockerfile` (identical; both expect the repo root as context).
 2. Ports Exposes `8000`. Storage: persistent volume mounted at `/data`. Attach a domain (e.g. `api.pettrack.app`).
 3. Health check path `/health`.
 4. Build the app with `EXPO_PUBLIC_API_URL=https://api.pettrack.app`.

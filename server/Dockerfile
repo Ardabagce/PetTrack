@@ -1,11 +1,13 @@
+# PetTrack API. Build context = repository root (Coolify: Base Directory "/").
+# Works with Dockerfile Location "/Dockerfile" or "/server/Dockerfile".
 FROM python:3.12-slim
 RUN apt-get update && apt-get install -y --no-install-recommends \
       tesseract-ocr tesseract-ocr-eng tesseract-ocr-deu tesseract-ocr-fra tesseract-ocr-spa tesseract-ocr-nld \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
-COPY requirements.txt .
+COPY server/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-COPY app.py .
+COPY server/app.py .
 ENV DATA_DIR=/data
 VOLUME ["/data"]
 EXPOSE 8000
