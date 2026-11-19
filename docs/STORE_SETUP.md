@@ -59,3 +59,9 @@ Everything else (records, documents, reminders) stays on the device.
 - Review screenshot (paywall) uploaded → both subscriptions are **Ready to Submit**.
 - First subscriptions must be attached to the first app version in App Store Connect ("In-App Purchases and Subscriptions" section of the version page) when submitting for review.
 - EAS credentials (distribution certificate + App Store provisioning profile) created and stored on Expo servers.
+
+## TestFlight via GitHub Actions
+
+`.github/workflows/testflight.yml` builds on a macOS runner and uploads with the App Store Connect API key.
+Secrets: `EXPO_TOKEN`, `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8`. Put `[testflight]` in a commit message for a full
+build, `[testflight-upload]` to upload the latest finished EAS cloud build, or run it from the Actions tab.
