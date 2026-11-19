@@ -28,7 +28,7 @@ export default function Onboarding() {
     <LinearGradient colors={[c.forest, c.forestDeep]} style={{ flex: 1 }}>
       <View style={{ position: 'absolute', right: -80, top: -60, width: 320, height: 320, borderRadius: 160, backgroundColor: '#CF5F3B', opacity: 0.3 }} />
       <SafeAreaView style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end', padding: 26, gap: 22 }}>
+        <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets keyboardDismissMode="interactive" contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end', padding: 26, gap: 22 }}>
           <Row gap={-12}>
             {(['paw', 'heart', 'medkit'] as const).map((icon, i) => (
               <View key={icon} style={{ width: 62, height: 62, borderRadius: 31, borderWidth: 3, borderColor: c.forestDeep, alignItems: 'center', justifyContent: 'center', backgroundColor: ['#CF5F3B', '#5A8A6E', '#4C7FAB'][i] }}>

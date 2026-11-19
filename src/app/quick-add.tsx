@@ -46,7 +46,7 @@ export default function QuickAdd() {
   ];
 
   return (
-    <ScrollView style={{ backgroundColor: c.canvas }} contentContainerStyle={{ padding: 22, gap: 18 }}>
+    <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets keyboardDismissMode="interactive" style={{ backgroundColor: c.canvas }} contentContainerStyle={{ padding: 22, gap: 18 }}>
       {dialog}
       <Row style={{ justifyContent: 'space-between' }}>
         <View><T variant="eyebrow">{t('Quick add')}</T><T variant="display" style={{ fontSize: 26 }}>{pet.name}</T></View>

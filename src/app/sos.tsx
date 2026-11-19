@@ -44,7 +44,7 @@ export default function Sos() {
           </Pressable>
         </Row>
       </SafeAreaView>
-      <ScrollView contentContainerStyle={{ padding: 20, gap: 14, paddingBottom: 60 }}>
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets keyboardDismissMode="interactive" contentContainerStyle={{ padding: 20, gap: 14, paddingBottom: 60 }}>
         {!!pet?.vetPhone && <Button icon="call" tint={c.danger} title={t('Call {{a}}', { a: pet.vetClinic || t('Veterinarian') })} onPress={() => tel(pet.vetPhone)} />}
         <Button icon="navigate" tint={c.ink} title={t('Find an emergency vet nearby')} onPress={() => Linking.openURL('https://maps.apple.com/?q=emergency%20veterinarian')} />
         {lines.map((h) => <Button key={h.id} variant="soft" tint={c.danger} icon="call-outline" title={`${h.name} · ${h.phone}`} onPress={() => tel(h.phone)} />)}

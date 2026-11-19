@@ -53,7 +53,7 @@ export function Screen({ children, title, scroll = true, padded = true, headerRi
         <Stack.Screen options={{ title, headerShown: true, headerRight: headerRight ? () => headerRight : undefined }} />
       )}
       {scroll ? (
-        <ScrollView contentContainerStyle={{ paddingTop: 12 }} keyboardShouldPersistTaps="handled" contentInsetAdjustmentBehavior="automatic">
+        <ScrollView automaticallyAdjustKeyboardInsets keyboardDismissMode="interactive" contentContainerStyle={{ paddingTop: 12, paddingBottom: 40 }} keyboardShouldPersistTaps="handled" contentInsetAdjustmentBehavior="automatic">
           {content}
         </ScrollView>
       ) : content}
@@ -65,7 +65,7 @@ export function TabScreen({ children, title, right }: { children: ReactNode; tit
   const c = useTheme();
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: c.canvas }}>
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 130, gap: 18 }} keyboardShouldPersistTaps="handled">
+      <ScrollView automaticallyAdjustKeyboardInsets keyboardDismissMode="interactive" contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 130, gap: 18 }} keyboardShouldPersistTaps="handled">
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 12 }}>
           <T variant="display" style={{ flex: 1 }}>{title}</T>
           {right}

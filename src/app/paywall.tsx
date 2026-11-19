@@ -41,7 +41,7 @@ export default function Paywall() {
             <Ionicons name="close" size={18} color={c.cream} />
           </Pressable>
         </Row>
-        <ScrollView contentContainerStyle={{ padding: 24, gap: 22 }}>
+        <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets keyboardDismissMode="interactive" contentContainerStyle={{ padding: 24, gap: 22 }}>
           <View style={{ gap: 12 }}>
             <View style={{ alignSelf: 'flex-start' }}><ProBadge /></View>
             <T variant="display" color={c.cream} style={{ fontSize: 32 }}>{t("Everything your pet's health needs, in one place.")}</T>

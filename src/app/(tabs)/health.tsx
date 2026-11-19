@@ -22,7 +22,9 @@ export default function Health() {
   const params = useLocalSearchParams<{ section?: Section }>();
   const [section, setSection] = useState<Section>('vaccines');
   const view = useSelectedPet();
-  useEffect(() => { if (params.section) setSection(params.section); }, [params.section]);
+  // Follow deep links like /health?section=symptoms (state adjusted during render, no effect needed).
+  const [linked, setLinked] = useState(params.section);
+  if (params.section !== linked) { setLinked(params.section); if (params.section) setSection(params.section); }
   if (!view.pet) return null;
   return (
     <TabScreen title={t('Health')}>

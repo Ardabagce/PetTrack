@@ -27,7 +27,7 @@ export default function Disclaimer() {
   const setSettings = useStore((s) => s.setSettings);
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: c.canvas }}>
-      <ScrollView contentContainerStyle={{ padding: 24, gap: 18 }}>
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets keyboardDismissMode="interactive" contentContainerStyle={{ padding: 24, gap: 18 }}>
         <View style={{ width: 56, height: 56, borderRadius: 18, backgroundColor: `${c.sky}22`, alignItems: 'center', justifyContent: 'center' }}>
           <Ionicons name="shield-checkmark" size={28} color={c.sky} />
         </View>

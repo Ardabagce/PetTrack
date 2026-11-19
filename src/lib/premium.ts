@@ -46,10 +46,10 @@ const RC_IOS_KEY: string =
   (process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY as string | undefined) ||
   ((Constants.expoConfig?.extra as { revenueCatIosKey?: string } | undefined)?.revenueCatIosKey ?? '');
 
-const useRevenueCat = () => Platform.OS === 'ios' && RC_IOS_KEY.length > 0 && Constants.executionEnvironment !== 'storeClient';
+const rcEnabled = () => Platform.OS === 'ios' && RC_IOS_KEY.length > 0 && Constants.executionEnvironment !== 'storeClient';
 /** Simulated store only for development and the web preview – never in an App Store build. */
 const isExpoGo = () => Constants.executionEnvironment === 'storeClient';
-const allowSimulation = () => !useRevenueCat() && (__DEV__ || Platform.OS === 'web' || isExpoGo());
+const allowSimulation = () => !rcEnabled() && (__DEV__ || Platform.OS === 'web' || isExpoGo());
 
 const SIMULATED: Plan[] = [
   { id: 'yearly', price: 34.99, currency: 'USD', display: '$34.99', perMonth: '$2.92', trial: '3 days' },
@@ -78,7 +78,7 @@ function applyCustomerInfo(info: CustomerInfo) {
 
 /** Call once at app start. */
 export async function initPurchases() {
-  if (!useRevenueCat() || configured) return;
+  if (!rcEnabled() || configured) return;
   try {
     Purchases.configure({ apiKey: RC_IOS_KEY });
     configured = true;
@@ -97,7 +97,7 @@ const unitLabel = (n: number, unit: string) => {
 
 export async function loadPlans() {
   if (allowSimulation()) { usePurchaseState.setState({ plans: SIMULATED, loading: false }); return; }
-  if (!useRevenueCat()) { usePurchaseState.setState({ plans: [], loading: false }); return; }
+  if (!rcEnabled()) { usePurchaseState.setState({ plans: [], loading: false }); return; }
   usePurchaseState.setState({ loading: true, error: undefined });
   try {
     await initPurchases();
@@ -133,7 +133,7 @@ export const yearlySavings = (plans: Plan[]) => {
 export async function purchase(plan: Plan['id']): Promise<boolean> {
   usePurchaseState.setState({ busy: true });
   try {
-    if (useRevenueCat()) {
+    if (rcEnabled()) {
       const pkg = packages[plan];
       if (!pkg) throw new Error(tr('Subscriptions are currently unavailable.'));
       const { customerInfo } = await Purchases.purchasePackage(pkg);
@@ -156,7 +156,7 @@ export async function purchase(plan: Plan['id']): Promise<boolean> {
 }
 
 export async function restorePurchases(): Promise<boolean> {
-  if (useRevenueCat()) {
+  if (rcEnabled()) {
     try {
       const info = await Purchases.restorePurchases();
       applyCustomerInfo(info);
@@ -169,7 +169,7 @@ export async function restorePurchases(): Promise<boolean> {
 }
 
 export async function manageSubscription() {
-  if (useRevenueCat()) {
+  if (rcEnabled()) {
     try { await Purchases.showManageSubscriptions(); return; } catch { /* fall through */ }
   }
   Linking.openURL('https://apps.apple.com/account/subscriptions');
