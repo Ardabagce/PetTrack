@@ -1,7 +1,7 @@
 # PetTrack – Terms of Use & Privacy Policy (DRAFT)
 
 > Draft for review by a lawyer before publishing. Host both texts on a public URL
-> (e.g. pettrack.app/terms and pettrack.app/privacy) and update `LINKS` in `src/app/paywall.tsx`.
+> (live at pettrack.bagce.dev/terms and /privacy) and update `LINKS` in `src/app/paywall.tsx`.
 
 ## Terms of Use
 
@@ -41,5 +41,5 @@
   or advertising SDKs and do not sell or share data.
 - **Hosting:** EU data centre (to be confirmed with the Coolify server location).
 - **Your rights:** Export everything (Settings → Export all data). Delete all server data any time
-  (Settings → Delete my data on the server). Contact: privacy@pettrack.app.
+  (Settings → Delete my data on the server). Contact: see pettrack.bagce.dev/support.
 - **Children:** PetTrack is not directed at children under 13.

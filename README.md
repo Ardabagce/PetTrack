@@ -63,9 +63,9 @@ cd server && pip install -r requirements.txt pytest httpx && pytest
 
 1. New resource → your GitHub repo → build pack **Dockerfile**. Base Directory `/` (repo root),
    Dockerfile Location `/Dockerfile` or `/server/Dockerfile` (identical; both expect the repo root as context).
-2. Ports Exposes `8000`. Storage: persistent volume mounted at `/data`. Attach a domain (e.g. `api.pettrack.app`).
-3. Health check path `/health`.
-4. Build the app with `EXPO_PUBLIC_API_URL=https://api.pettrack.app`.
+2. Ports Exposes `8000`. Storage: persistent volume mounted at `/data`. Attach the domain as `https://pettrack.bagce.dev` (with https).
+3. Health check path `/health`. Environment variables: `CONTACT_EMAIL`, `OPERATOR` (name + postal address for the legal pages), `HOSTING` (e.g. "Hetzner, Germany").
+4. Build the app with `EXPO_PUBLIC_API_URL=https://pettrack.bagce.dev (already set in app.json → extra.apiUrl)`.
 
 Hosting is in the EU if you pick an EU server – recommended for GDPR. The server stores no names or e-mails
 except the first name family members choose to show.

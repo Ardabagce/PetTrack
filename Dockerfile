@@ -8,6 +8,7 @@ WORKDIR /app
 COPY server/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY server/app.py .
+COPY server/site ./site
 ENV DATA_DIR=/data
 VOLUME ["/data"]
 EXPOSE 8000

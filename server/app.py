@@ -25,13 +25,14 @@ from typing import Any
 from fastapi import Depends, FastAPI, Form, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 DATA_DIR = os.environ.get("DATA_DIR", "./data")
 DB_PATH = os.path.join(DATA_DIR, "pettrack.db")
 MAX_IMAGE_BYTES = 8 * 1024 * 1024
 
-app = FastAPI(title="PetTrack API", version="1.0.0")
+app = FastAPI(title="PetTrack API", version="1.0.0", docs_url=None, redoc_url=None)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 SCHEMA = """
@@ -359,3 +360,46 @@ def scan(body: ScanIn, token: str = Depends(device)) -> dict[str, Any]:
     image = ImageOps.exif_transpose(Image.open(io.BytesIO(raw))).convert("L")
     text = pytesseract.image_to_string(image, lang=os.environ.get("OCR_LANGS", "eng+deu+fra+spa+nld"))
     return {"text": text}
+
+
+# ---------------------------------------------------------------- website (landing + legal pages)
+
+SITE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "site")
+if os.path.isdir(SITE_DIR):
+    app.mount("/site", StaticFiles(directory=SITE_DIR), name="site")
+
+
+def site_page(name: str) -> HTMLResponse:
+    """Renders a site page with operator details from the environment (set them in Coolify)."""
+    parts = [open(os.path.join(SITE_DIR, f), encoding="utf-8").read() for f in ("_head.html", f"{name}.html", "_foot.html")]
+    html_text = "".join(parts)
+    values = {
+        "CONTACT_EMAIL": html.escape(os.environ.get("CONTACT_EMAIL", "")) or "contact address coming soon",
+        "OPERATOR": html.escape(os.environ.get("OPERATOR", "PetTrack")),
+        "HOSTING": html.escape(os.environ.get("HOSTING", "Servers operated by the PetTrack operator.")),
+        "UPDATED": html.escape(os.environ.get("LEGAL_UPDATED", "19 November 2026")),
+        "YEAR": time.strftime("%Y"),
+    }
+    for key, value in values.items():
+        html_text = html_text.replace("{{" + key + "}}", value)
+    return HTMLResponse(html_text, headers={"Cache-Control": "public, max-age=300"})
+
+
+@app.get("/", response_class=HTMLResponse)
+def landing() -> HTMLResponse:
+    return site_page("index")
+
+
+@app.get("/privacy", response_class=HTMLResponse)
+def privacy() -> HTMLResponse:
+    return site_page("privacy")
+
+
+@app.get("/terms", response_class=HTMLResponse)
+def terms() -> HTMLResponse:
+    return site_page("terms")
+
+
+@app.get("/support", response_class=HTMLResponse)
+def support() -> HTMLResponse:
+    return site_page("support")

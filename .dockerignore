@@ -2,3 +2,5 @@
 *
 !server/requirements.txt
 !server/app.py
+!server/site
+!server/site/**

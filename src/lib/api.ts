@@ -2,7 +2,7 @@ import Constants from 'expo-constants';
 import { getState, newId } from './store';
 
 /**
- * PetTrack backend (deploy `server/` on Coolify). Set EXPO_PUBLIC_API_URL, e.g. https://api.pettrack.app.
+ * PetTrack backend (deploy `server/` on Coolify). Set EXPO_PUBLIC_API_URL, e.g. https://pettrack.bagce.dev.
  * Without it the app runs fully offline and server features show a demo.
  */
 export const API_URL: string =
@@ -36,4 +36,4 @@ export async function api<T>(path: string, init: { method?: string; body?: unkno
   return (await res.json()) as T;
 }
 
-export const publicProfileUrl = (slug: string) => `${API_URL || 'https://pettrack.app'}/p/${slug}`;
+export const publicProfileUrl = (slug: string) => `${API_URL || 'https://pettrack.bagce.dev'}/p/${slug}`;

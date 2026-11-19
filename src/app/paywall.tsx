@@ -11,7 +11,7 @@ import { useStore } from '@/lib/store';
 import { radius, useTheme } from '@/lib/theme';
 import { toast } from '@/lib/uiState';
 
-export const LINKS = { terms: 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/', privacy: 'https://pettrack.app/privacy' };
+export const LINKS = { terms: 'https://pettrack.bagce.dev/terms', privacy: 'https://pettrack.bagce.dev/privacy', support: 'https://pettrack.bagce.dev/support' };
 
 export default function Paywall() {
   const c = useTheme();

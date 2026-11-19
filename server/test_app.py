@@ -43,3 +43,9 @@ def test_delete_device_removes_everything():
     assert client.delete("/api/devices/me", headers=owner).json() == {"deleted": True}
     assert client.get(f"/p/{slug}").status_code == 404
     assert client.post("/api/household", json={"name": "A"}, headers=owner).status_code == 401
+
+def test_site_pages():
+    for path in ["/", "/privacy", "/terms", "/support"]:
+        r = client.get(path)
+        assert r.status_code == 200 and "PetTrack" in r.text and "{{" not in r.text
+    assert client.get("/site/style.css").status_code == 200

@@ -110,7 +110,7 @@ export default function Settings() {
       </FormSection>
 
       <FormSection title={t('About')}>
-        <NavRow icon="mail-outline" label={t('Contact support')} onPress={() => Linking.openURL('mailto:support@pettrack.app')} />
+        <NavRow icon="mail-outline" label={t('Contact support')} onPress={() => Linking.openURL(LINKS.support)} />
         <NavRow icon="lock-closed-outline" label={t('Privacy policy')} onPress={() => Linking.openURL(LINKS.privacy)} />
         <NavRow icon="document-outline" label={t('Terms of use')} onPress={() => Linking.openURL(LINKS.terms)} />
         <Row style={{ justifyContent: 'space-between' }}><T variant="sub">{t('Server')}</T><T variant="caption">{hasBackend() ? t('Connected') : t('Offline mode')}</T></Row>
