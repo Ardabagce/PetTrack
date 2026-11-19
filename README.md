@@ -1,54 +1,76 @@
-# PetTrack — Pet Health Passport & Care Tracker (iOS)
+# PetTrack — pet health passport & care tracker
 
-Native SwiftUI app for the US & European markets. Languages: English, Spanish, German, French, Dutch.
+Expo (React Native + TypeScript) app for iPhone, built for the US and European markets.
+Languages: English, Spanish, German, French, Dutch. Layout adapts to the unfolded iPhone Duo (two columns, symptom-diary "vet mode").
 
-## Features (v1)
+## Try it
 
-| Area | Free | Premium |
-|---|---|---|
-| Pets | 1 | Unlimited |
-| Today: meals/water check-off, upcoming, weight trend | ✓ | ✓ |
-| Vaccines + booster notifications (7 days before & on the day) | ✓ | ✓ |
-| Vet journal (manual), weight chart, expenses list | ✓ | ✓ |
-| Feeding times | 3 | Unlimited |
-| Custom reminders (meds, flea & tick, grooming…) | 3 open | Unlimited |
-| Symptom photo diary (day-by-day photos, severity, compare) | 1 open case | Unlimited + PDF report |
-| **Scan vet reports → visit record** (on-device OCR, 5 languages) | – | ✓ |
-| **Shareable PDF health passport** | preview | ✓ |
-| Food transition planner (7/10/14 days + daily notifications) | – | ✓ |
-| Smart feeder sync | – | ✓ |
-| Cost insights chart | – | ✓ |
-
-Also: Siri / Shortcuts action “Log a feeding”, welcome tour, TipKit hints, “What's new” screen per release.
-
-Subscriptions: `com.pettrack.premium.monthly` and `com.pettrack.premium.yearly`, both with a **3-day free trial** (introductory offer), in one subscription group. A local `Configuration/PetTrack.storekit` lets you test purchases in the simulator.
-
-## Getting started (Mac)
+**On your iPhone (no Mac needed)**
 
 ```bash
-brew install xcodegen
-xcodegen generate
-open PetTrack.xcodeproj
+npm install
 ```
 
-Requirements: Xcode 16+ (Xcode 26 enables the on-device Apple Intelligence report extraction), iOS 17+.
-Set your team in `project.yml` (`DEVELOPMENT_TEAM`) and change the bundle ID if needed.
+```bash
+npx expo start
+```
 
-In Debug builds, Settings → Developer → “Simulate Premium” unlocks everything without a purchase.
+Install **Expo Go** from the App Store and scan the QR code shown in the terminal.
 
-## Architecture
+**In the browser:** `npm run web`
 
-- SwiftUI + SwiftData (CloudKit-compatible schema), Swift Charts, StoreKit 2, TipKit, VisionKit/Vision OCR, App Intents.
-- `PetTrack/Models` – data model · `Services` – store, notifications, OCR parser, PDF, feeders
-- `DesignSystem` – “Linen & Forest” palette, serif display type, floating tab bar
-- `Features/*` – one folder per area
-- Localization: `tools/translations.py` → `python3 tools/build_strings.py` generates `Localizable.xcstrings`.
+## Features
 
-## Before App Store submission
+| | Free | Premium |
+|---|---|---|
+| Today: meals/water check-off with “who fed”, coming up, weight trend | ✓ | ✓ |
+| Vaccines with booster notifications, vet journal, weight, expenses | ✓ | ✓ |
+| Food safety lookup (51 items, offline, poison hotlines) | ✓ | ✓ |
+| Visit preparation (summary + questions for the vet) | ✓ | PDF |
+| Symptom photo diary with day-by-day viewer | 1 case | unlimited + PDF |
+| Family sharing – “Who fed the dog?”, double-feeding warning | – | ✓ |
+| Scan vet reports → visit record (5 languages) | – | ✓ |
+| Shareable PDF health passport | preview | ✓ |
+| US ⇄ Europe travel planner (USDA/EU/UK/CDC rules, countdown reminders) | – | ✓ |
+| Insurance claim pack (invoice + report + symptom diary PDF, claim tracking) | – | ✓ |
+| Collar QR tag, lost-pet mode, printable poster, finder messages | – | ✓ |
+| Food transition planner, cost insights, unlimited pets/reminders | – | ✓ |
 
-- App icon (1024×1024) in `Assets.xcassets/AppIcon`
-- Host privacy policy & terms; update `AppLinks` in `PaywallView.swift`
-- Create the subscription group + 2 products + 3-day free trial in App Store Connect
-- Localized App Store screenshots & metadata (5 languages)
+Promise: data is never locked – viewing and JSON export stay free.
 
-See `docs/` for the smart-feeder integration notes and the competitor analysis.
+Subscriptions: monthly $4.99 / yearly $34.99, 3-day free trial. Expo Go and web use a simulated store
+(`src/lib/premium.ts`); the App Store build plugs in RevenueCat with products `premium.monthly` / `premium.yearly`.
+
+## Project layout
+
+- `src/app` – screens (Expo Router). `(tabs)` = Today, Health, Nutrition, Passport + floating icon-only tab bar
+- `src/lib` – data store (zustand + AsyncStorage), domain logic (parser, travel rules, diet plan, food safety), PDF templates, notifications
+- `src/components` – design system (“Linen & Forest”), charts, date fields
+- `src/i18n` – generated translations. Edit `tools/translations*.py`, then `npm run strings`
+- `server/` – FastAPI backend for Coolify: household sync, collar-tag pages `/p/<slug>`, lost mode, finder messages, Tesseract OCR
+
+## Checks
+
+```bash
+npm run typecheck && npm test
+```
+
+```bash
+cd server && pip install -r requirements.txt pytest httpx && pytest
+```
+
+## Backend on Coolify
+
+1. New resource → Dockerfile → this repo, base directory `server/`.
+2. Add a persistent volume at `/data`, expose port 8000, attach a domain (e.g. `api.pettrack.app`).
+3. Build the app with `EXPO_PUBLIC_API_URL=https://api.pettrack.app`.
+
+Hosting is in the EU if you pick an EU server – recommended for GDPR. The server stores no names or e-mails
+except the first name family members choose to show.
+
+## Not yet done
+
+- Widgets & Apple Watch app (native Swift targets via `expo-apple-targets`, need an EAS development build)
+- RevenueCat wiring and App Store Connect products
+- App icon, privacy policy & terms pages
+- Translations of the 51 food-safety notes (names are translated)
