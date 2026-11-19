@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useState } from 'react';
 import { View } from 'react-native';
-import { Banner, Button, Card, Field, FormSection, Row, Screen, T } from '@/components/ui';
+import { Banner, Button, Card, EditorHeader, Field, FormSection, Row, Screen, T, useConfirm } from '@/components/ui';
 import { logFeeding, syncHousehold } from '@/lib/actions';
 import { api, hasBackend } from '@/lib/api';
 import { formatTime } from '@/lib/format';
@@ -21,6 +21,7 @@ export default function Family() {
   const setSettings = useStore((s) => s.setSettings);
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
+  const { ask, dialog } = useConfirm();
   const household = settings.household;
   const fedToday = logsToday(view.logs).filter((l) => l.kind === 'meal');
 
@@ -43,7 +44,9 @@ export default function Family() {
   });
 
   return (
-    <Screen title={t('Family')}>
+    <Screen modal>
+      <EditorHeader title={t('Family sharing')} />
+      {dialog}
       <View style={{ gap: 10 }}>
         <Row gap={-10}>
           {[c.accent, c.sage, c.sky].map((tint, i) => (
@@ -63,6 +66,7 @@ export default function Family() {
       {household.role === 'none' ? (
         hasBackend() ? (
           <>
+            {!settings.memberName.trim() && <T variant="caption" color={c.accent}>{t('Enter your name first – family members see it next to each meal.')}</T>}
             <Button title={t('Create a household')} icon="home" disabled={busy || !settings.memberName.trim()} onPress={create} />
             <FormSection title={t('Have an invite code?')}>
               <Field label={t('Invite code')} value={code} onChange={setCode} placeholder="ABC-123" />
@@ -93,7 +97,11 @@ export default function Family() {
           <T variant="caption">{t('Members')}: {household.members.join(', ')}</T>
           <Row gap={10}>
             <Button variant="soft" title={t('Sync now')} icon="sync" disabled={busy} onPress={() => run(async () => { toast(t('{{a}} new', { a: await syncHousehold() })); })} />
-            <Button variant="soft" tint={c.danger} title={t('Leave household')} onPress={() => getState().setSettings({ household: { role: 'none', members: [] } })} />
+            <Button variant="soft" tint={c.danger} title={t('Leave household')} onPress={() => ask({
+              title: t('Leave household'), message: t('You will stop seeing feedings logged by your family. Your own records stay on this device.'),
+              confirm: t('Leave'), destructive: true,
+              onConfirm: () => getState().setSettings({ household: { role: 'none', members: [] } }),
+            })} />
           </Row>
         </Card>
       )}

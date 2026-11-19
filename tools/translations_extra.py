@@ -411,3 +411,14 @@ T.update({
 "Vaccine due": ("Vacuna pendiente", "Impfung fällig", "Vaccin à faire", "Vaccinatie gepland"),
 "Mark done": ("Marcar como hecho", "Als erledigt markieren", "Marquer comme fait", "Markeer als gedaan"),
 })
+
+T.update({
+"Could not reach the PetTrack server. Check your connection and try again.": ("No se pudo conectar con el servidor de PetTrack. Revisa tu conexión e inténtalo de nuevo.", "Der PetTrack-Server ist nicht erreichbar. Prüfe deine Verbindung und versuche es erneut.", "Impossible de joindre le serveur PetTrack. Vérifiez votre connexion et réessayez.", "Kan de PetTrack-server niet bereiken. Controleer je verbinding en probeer het opnieuw."),
+"Invite code not found": ("Código de invitación no encontrado", "Einladungscode nicht gefunden", "Code d'invitation introuvable", "Uitnodigingscode niet gevonden"),
+"Not in a household": ("No perteneces a ningún hogar", "Du bist in keinem Haushalt", "Vous ne faites partie d'aucun foyer", "Je zit niet in een huishouden"),
+"Enter your name first – family members see it next to each meal.": ("Primero escribe tu nombre: tu familia lo verá junto a cada comida.", "Gib zuerst deinen Namen ein – deine Familie sieht ihn bei jeder Mahlzeit.", "Saisissez d'abord votre nom : votre famille le verra à côté de chaque repas.", "Vul eerst je naam in – je familie ziet die bij elke maaltijd."),
+"You will stop seeing feedings logged by your family. Your own records stay on this device.": ("Dejarás de ver las comidas que registre tu familia. Tus registros siguen en este dispositivo.", "Du siehst dann keine Fütterungen deiner Familie mehr. Deine eigenen Einträge bleiben auf diesem Gerät.", "Vous ne verrez plus les repas notés par votre famille. Vos propres données restent sur cet appareil.", "Je ziet dan geen voedingen van je familie meer. Je eigen gegevens blijven op dit apparaat."),
+"Leave": ("Salir", "Verlassen", "Quitter", "Verlaten"),
+"Too many messages, please call instead.": ("Demasiados mensajes, por favor llama.", "Zu viele Nachrichten, bitte ruf stattdessen an.", "Trop de messages, merci d'appeler.", "Te veel berichten, bel liever."),
+"Please remove links or offensive words from the public page.": ("Elimina los enlaces o palabras ofensivas de la página pública.", "Bitte entferne Links oder beleidigende Wörter von der öffentlichen Seite.", "Retirez les liens ou mots offensants de la page publique.", "Verwijder links of beledigende woorden van de openbare pagina."),
+})

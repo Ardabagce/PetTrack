@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { api, hasBackend } from './api';
+import { api, ApiError, hasBackend } from './api';
 import { addDays, addMonths, addYears } from './dates';
 import { formatTime } from './format';
 import { tr } from './i18n';
@@ -46,9 +46,15 @@ export async function syncHousehold(): Promise<number> {
   const slots = data.slots.map((s) => ({ ...s }));
   const since = settings.household.lastSync ?? addDays(new Date(), -7).toISOString();
   const local = data.logs.filter((l) => l.source !== 'household' && l.date >= since).map(toEvent);
-  const res = await api<{ events: (ReturnType<typeof toEvent> & { fedBy: string })[]; pets: { id: string; name: string; species: Pet['species'] }[]; members: string[] }>(
-    '/api/household/sync', { method: 'POST', body: { since, events: local, pets, slots } },
-  );
+  type SyncResult = { events: (ReturnType<typeof toEvent> & { fedBy: string })[]; pets: { id: string; name: string; species: Pet['species'] }[]; members: string[] };
+  let res: SyncResult;
+  try {
+    res = await api<SyncResult>('/api/household/sync', { method: 'POST', body: { since, events: local, pets, slots } });
+  } catch (e) {
+    // The household no longer exists on the server (e.g. it was reset): fall back to "not shared" instead of failing forever.
+    if (e instanceof ApiError && e.status === 404) setSettings({ household: { role: 'none', members: [] } });
+    throw e;
+  }
   const known = new Set(getState().data.logs.map((l) => l.id));
   const incoming: FeedingLog[] = res.events.filter((e) => !known.has(e.id)).map((e) => ({ ...e, source: 'household' as const }));
   // Members get a local copy of pets shared by the household owner.

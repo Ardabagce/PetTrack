@@ -1,4 +1,5 @@
 import Constants from 'expo-constants';
+import { tr } from './i18n';
 import { getState, newId } from './store';
 
 /**
@@ -21,17 +22,41 @@ async function deviceToken(): Promise<string> {
   return token;
 }
 
+export class ApiError extends Error {
+  constructor(public status: number, message: string) { super(message); }
+}
+
+/** Turns a FastAPI error body ({"detail": ...}) into a readable sentence. */
+function errorMessage(status: number, text: string): string {
+  try {
+    const detail = (JSON.parse(text) as { detail?: unknown }).detail;
+    if (typeof detail === 'string') return tr(detail);
+    if (Array.isArray(detail) && detail[0]?.msg) return String(detail[0].msg);
+  } catch { /* not JSON */ }
+  return text && text.length < 160 && !text.trimStart().startsWith('<') ? text : `Server error ${status}`;
+}
+
 export async function api<T>(path: string, init: { method?: string; body?: unknown } = {}): Promise<T> {
   if (!hasBackend()) throw new Error('No server configured');
-  const token = await deviceToken();
-  const res = await fetch(`${API_URL}${path}`, {
+  const send = async (token: string) => fetch(`${API_URL}${path}`, {
     method: init.method ?? 'GET',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: init.body === undefined ? undefined : JSON.stringify(init.body),
   });
+  let res: Response;
+  try {
+    res = await send(await deviceToken());
+    // The server no longer knows this device (e.g. its database was reset): register again and retry once.
+    if (res.status === 401) {
+      getState().setSettings({ deviceToken: undefined });
+      res = await send(await deviceToken());
+    }
+  } catch (e) {
+    throw new Error(tr('Could not reach the PetTrack server. Check your connection and try again.'), { cause: e });
+  }
   if (!res.ok) {
     const text = await res.text().catch(() => '');
-    throw new Error(text || `Server error ${res.status}`);
+    throw new ApiError(res.status, errorMessage(res.status, text));
   }
   return (await res.json()) as T;
 }
