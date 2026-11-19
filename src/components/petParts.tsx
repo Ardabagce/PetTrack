@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import { View } from 'react-native';
 import { FREE_LIMITS, requirePremium } from '@/lib/premium';
 import { ageText, formatSlotTime, formatWeight, resolvedUnit } from '@/lib/format';
+import { ageInYears, humanYears, lifeStage } from '@/lib/wellness';
 import { useTranslation } from '@/lib/i18n';
 import { type PetView, useSelectedPet, usePremium, vaccineStatus } from '@/lib/selectors';
 import { useStore } from '@/lib/store';
@@ -32,6 +33,9 @@ export function PetHero({ view }: { view: PetView }) {
   const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
   const meals = view.slots.filter((s) => s.enabled && s.kind === 'meal');
   const next = meals.find((s) => s.hour * 60 + s.minute > nowMin) ?? meals[0];
+  const years = pet.birthDate ? ageInYears(pet.birthDate) : undefined;
+  const human = years !== undefined ? humanYears(pet.species, years, view.latestWeight?.kg) : undefined;
+  const stage = years !== undefined ? lifeStage(pet.species, years, view.latestWeight?.kg) : undefined;
   const stat = (icon: keyof typeof Ionicons.glyphMap, value: string, label: string) => (
     <View style={{ flex: 1, backgroundColor: '#F6F0E414', borderRadius: radius.medium, padding: 12, gap: 4 }} accessible accessibilityLabel={`${label}: ${value}`}>
       <Ionicons name={icon} size={14} color="#F6F0E499" />
@@ -48,6 +52,9 @@ export function PetHero({ view }: { view: PetView }) {
           <View style={{ flex: 1 }}>
             <T variant="display" color={c.cream} style={{ fontSize: 30 }}>{pet.name}</T>
             <T variant="sub" color="#F6F0E4B3" numberOfLines={1}>{[pet.breed || t(pet.species.charAt(0).toUpperCase() + pet.species.slice(1)), ageText(pet.birthDate)].filter(Boolean).join(' · ')}</T>
+            {human !== undefined && stage && (
+              <T variant="caption" color="#F6F0E499">{t('≈ {{a}} in human years · {{b}}', { a: human, b: t(LIFE_STAGE[stage]) })}</T>
+            )}
           </View>
         </Row>
         <Row gap={10}>
@@ -59,6 +66,8 @@ export function PetHero({ view }: { view: PetView }) {
     </View>
   );
 }
+
+const LIFE_STAGE = { baby: 'Baby', junior: 'Junior', adult: 'Adult', mature: 'Mature adult', senior: 'Senior' } as const;
 
 export const kindIcon = { meal: 'restaurant', water: 'water', treat: 'star' } as const;
 export function kindColor(c: ReturnType<typeof useTheme>, kind: 'meal' | 'water' | 'treat') {

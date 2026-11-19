@@ -99,6 +99,25 @@ def register_device() -> dict[str, str]:
     return {"token": token}
 
 
+@app.delete("/api/devices/me")
+def delete_device(token: str = Depends(device)) -> dict[str, bool]:
+    """Deletes everything this device created on the server (App Store guideline 5.1.1(v))."""
+    with db() as c:
+        owned = [r["code"] for r in c.execute("SELECT code FROM households WHERE owner = ?", (token,))]
+        for code in owned:
+            for table in ("members", "household_pets", "events"):
+                c.execute(f"DELETE FROM {table} WHERE code = ?", (code,))
+            c.execute("DELETE FROM households WHERE code = ?", (code,))
+        c.execute("DELETE FROM members WHERE token = ?", (token,))
+        c.execute("DELETE FROM events WHERE token = ?", (token,))
+        pets = [r["pet_id"] for r in c.execute("SELECT pet_id FROM public_pets WHERE owner = ?", (token,))]
+        for pet_id in pets:
+            c.execute("DELETE FROM messages WHERE pet_id = ?", (pet_id,))
+        c.execute("DELETE FROM public_pets WHERE owner = ?", (token,))
+        c.execute("DELETE FROM devices WHERE token = ?", (token,))
+    return {"deleted": True}
+
+
 # ---------------------------------------------------------------- household
 
 class HouseholdIn(BaseModel):
@@ -299,7 +318,8 @@ def public_page(slug: str) -> HTMLResponse:
     <form method="post" action="/p/{esc(slug)}/message"><input name="name" placeholder="Your name" maxlength="60">
     <input name="phone" placeholder="Your phone" maxlength="40"><textarea name="message" rows="3" placeholder="Where is the pet now?" required maxlength="600"></textarea>
     <button type="submit">Send to the owner</button></form></div>
-    <p><small>The owner's address is never shown on this page.</small></p></main></body></html>"""
+    <p><small>The owner's address is never shown on this page. Information on this page is provided by the owner;
+    PetTrack does not verify it. In a medical emergency contact a veterinarian.</small></p></main></body></html>"""
     return HTMLResponse(page)
 
 

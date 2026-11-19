@@ -118,6 +118,7 @@ function Emergency({ view }: { view: PetView }) {
       <InfoRow icon="bandage-outline" label={t('Current medication')} value={view.activeMedications.map((m) => [m.name, m.dosage].filter(Boolean).join(' ')).join(', ')} tint={c.danger} />
       {!!pet.bloodType && <InfoRow icon="water-outline" label={t('Blood type')} value={pet.bloodType} tint={c.danger} />}
       {!!pet.emergencyNotes && <InfoRow icon="chatbox-ellipses-outline" label={t('Notes')} value={pet.emergencyNotes} tint={c.danger} />}
+      <Button small tint={c.danger} icon="medkit" title={t('Emergency help')} onPress={() => router.push('/sos')} />
     </Card>
   );
 }

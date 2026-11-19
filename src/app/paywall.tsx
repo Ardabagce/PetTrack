@@ -92,6 +92,7 @@ export default function Paywall() {
               ? t('{{a}} free, then {{b}} per {{c}}. Renews automatically until cancelled in Settings at least 24 hours before the end of the period.', { a: t('3 days'), b: selected.display, c: period })
               : t('{{a}} per {{b}}. Renews automatically until cancelled in Settings at least 24 hours before the end of the period.', { a: selected.display, b: period })}
           </T>
+          <T variant="caption" color="#F6F0E48C" center>{t('Payment is charged to your Apple ID at confirmation of purchase. Manage or cancel any time in your App Store account settings.')}</T>
           <Row gap={18} style={{ justifyContent: 'center' }}>
             <Pressable onPress={async () => { toast(t((await restorePurchases()) ? 'Purchases restored' : 'No purchases found')); }} accessibilityRole="button"><T variant="caption" color={c.cream}>{t('Restore purchases')}</T></Pressable>
             <Pressable onPress={() => Linking.openURL(LINKS.terms)} accessibilityRole="link"><T variant="caption" color={c.cream}>{t('Terms')}</T></Pressable>

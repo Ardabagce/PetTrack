@@ -46,6 +46,8 @@ export interface Pet {
   /** Public collar-tag profile slug, set once published to the server. */
   publicSlug?: string;
   lost?: LostMode;
+  activity?: 'low' | 'normal' | 'high';
+  foodKcal100g?: number;
 }
 
 export interface Vaccination { id: ID; petId: ID; name: string; dateGiven: ISODate; nextDue?: ISODate; batch: string; by: string; notes: string }
@@ -67,6 +69,9 @@ export interface Claim {
   id: ID; petId: ID; visitId?: ID; insurer: string; policy: string; claimNo: string; status: ClaimStatus; claimed: number;
   reimbursed?: number; currency: string; submittedAt?: ISODate; includeSymptoms: boolean; notes: string; createdAt: ISODate;
 }
+export type Stool = 'normal' | 'soft' | 'diarrhea' | 'hard' | 'none';
+export interface CheckIn { id: ID; petId: ID; date: ISODate; energy: number; appetite: number; stool: Stool; vomit: boolean; note: string }
+export interface BcsEntry { id: ID; petId: ID; date: ISODate; score: number }
 export interface VetQuestion { id: ID; petId: ID; text: string; createdAt: ISODate; answered: boolean }
 
 export interface Collections {
@@ -85,6 +90,8 @@ export interface Collections {
   travelPlans: TravelPlan[];
   claims: Claim[];
   questions: VetQuestion[];
+  checkins: CheckIn[];
+  bcs: BcsEntry[];
 }
 
 export type CollectionKey = keyof Collections;
@@ -103,4 +110,5 @@ export interface Settings {
   premium: { active: boolean; plan?: 'monthly' | 'yearly'; trialEndsAt?: ISODate; trialUsed: boolean };
   household: { code?: string; role: 'none' | 'owner' | 'member'; members: string[]; lastSync?: ISODate };
   deviceToken?: string;
+  disclaimerAccepted?: string;
 }

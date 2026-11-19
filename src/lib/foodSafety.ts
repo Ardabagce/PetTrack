@@ -8,7 +8,7 @@ import type { Species } from './types';
 export type SafetyLevel = 'safe' | 'caution' | 'toxic' | 'emergency';
 export const LEVEL_ORDER: SafetyLevel[] = ['safe', 'caution', 'toxic', 'emergency'];
 export const LEVEL_TITLE: Record<SafetyLevel, string> = {
-  safe: 'Safe in moderation',
+  safe: 'Generally low risk',
   caution: 'Caution',
   toxic: 'Toxic',
   emergency: 'Emergency – call a vet now',

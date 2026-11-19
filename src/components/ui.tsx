@@ -213,15 +213,24 @@ export function Field({ label, value, onChange, placeholder, multiline, keyboard
   keyboard?: 'default' | 'decimal-pad' | 'email-address' | 'phone-pad' | 'number-pad'; suffix?: string; autoFocus?: boolean; big?: boolean;
 }) {
   const c = useTheme();
+  const [focused, setFocused] = useState(false);
   return (
     <View style={{ gap: 6 }}>
-      {label && <T variant="caption">{label}</T>}
-      <Row gap={8} style={{ backgroundColor: c.surface, borderRadius: radius.small, borderWidth: StyleSheet.hairlineWidth, borderColor: c.hairline, paddingHorizontal: 14 }}>
+      {label && <T variant="caption" color={focused ? c.ink : c.ink2}>{label}</T>}
+      <Row gap={8} style={[{
+        backgroundColor: c.surface, borderRadius: radius.small + 2, paddingHorizontal: 14,
+        borderWidth: 1, borderColor: focused ? c.ink : c.hairline,
+      },
+      // Soft focus ring instead of the browser's default outline.
+      Platform.OS === 'web' ? { boxShadow: focused ? `0 0 0 4px ${c.ink}14` : 'none', transitionDuration: '150ms', transitionProperty: 'border-color, box-shadow' } as ViewStyle : null]}>
         <TextInput
           value={value} onChangeText={onChange} placeholder={placeholder ?? label} placeholderTextColor={c.ink3} multiline={multiline}
           keyboardType={keyboard} autoFocus={autoFocus} accessibilityLabel={label ?? placeholder}
           autoCapitalize={keyboard === 'email-address' ? 'none' : 'sentences'}
-          style={{ flex: 1, minHeight: multiline ? 76 : 48, paddingVertical: 12, color: c.ink, fontFamily: big ? fonts.display : fonts.body, fontSize: big ? 30 : 16, textAlignVertical: multiline ? 'top' : 'center' }}
+          onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+          selectionColor={c.accent}
+          style={[{ flex: 1, minHeight: multiline ? 76 : 48, paddingVertical: 12, color: c.ink, fontFamily: big ? fonts.display : fonts.body, fontSize: big ? 30 : 16, textAlignVertical: multiline ? 'top' : 'center' },
+            Platform.OS === 'web' ? ({ outlineStyle: 'none', outlineWidth: 0 } as unknown as TextStyle) : null]}
         />
         {suffix && <T variant="sub">{suffix}</T>}
       </Row>

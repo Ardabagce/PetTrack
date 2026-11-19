@@ -178,6 +178,10 @@ function Weight({ view }: { view: PetView }) {
   return (
     <>
       <SectionHeader title={t('Weight')} action={t('Log')} onAction={() => router.push('/weight')} />
+      <Row gap={10}>
+        <Button style={{ flex: 1 }} small variant="soft" tint={c.sage} icon="body-outline" title={t('Body condition')} onPress={() => router.push('/portions')} />
+        <Button style={{ flex: 1 }} small variant="soft" tint={c.sky} icon="swap-horizontal" title={t('kg ⇄ lb')} onPress={() => router.push('/converter')} />
+      </Row>
       <Card>
         <Row align="flex-end" gap={10}>
           <T variant="display">{view.latestWeight ? formatWeight(view.latestWeight.kg, unit) : '—'}</T>

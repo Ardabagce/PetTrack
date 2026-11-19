@@ -43,6 +43,7 @@ html,body{height:100%;margin:0}
 body{overflow:hidden;background:#F4EFE7}
 @media (prefers-color-scheme:dark){body{background:#0E1311}}
 #root{display:flex;height:100%;flex:1;max-width:760px;margin:0 auto;box-shadow:0 0 0 1px rgba(0,0,0,.06)}
+input:focus,textarea:focus{outline:none}
 </style>"""
     # Storage can be blocked in private windows: fall back to memory so the app still runs.
     shim = "<script>try{localStorage.setItem('__t','1');localStorage.removeItem('__t')}catch(e){var m={};Object.defineProperty(window,'localStorage',{value:{getItem:function(k){return k in m?m[k]:null},setItem:function(k,v){m[k]=String(v)},removeItem:function(k){delete m[k]},clear:function(){m={}},key:function(i){return Object.keys(m)[i]||null},get length(){return Object.keys(m).length}}})}</script>"

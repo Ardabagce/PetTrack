@@ -35,3 +35,11 @@ def test_public_page_and_messages():
 
 def test_requires_token():
     assert client.post("/api/household", json={"name": "A"}).status_code == 401
+
+def test_delete_device_removes_everything():
+    owner = token()
+    client.post("/api/household", json={"name": "Alex"}, headers=owner)
+    slug = client.put("/api/pets/pz/public", json={"name": "Z", "species": "dog"}, headers=owner).json()["slug"]
+    assert client.delete("/api/devices/me", headers=owner).json() == {"deleted": True}
+    assert client.get(f"/p/{slug}").status_code == 404
+    assert client.post("/api/household", json={"name": "A"}, headers=owner).status_code == 401

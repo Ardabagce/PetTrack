@@ -5,7 +5,7 @@ import { Linking, Platform, Pressable, View } from 'react-native';
 import * as Sharing from 'expo-sharing';
 import { File, Paths } from 'expo-file-system';
 import { Chip, Chips, EditorHeader, FormSection, ProBadge, Row, Screen, T, ToggleRow, useConfirm } from '@/components/ui';
-import { hasBackend } from '@/lib/api';
+import { api, hasBackend } from '@/lib/api';
 import { formatDate } from '@/lib/format';
 import i18n, { deviceLanguage, LANGUAGES, useTranslation } from '@/lib/i18n';
 import { setSimulatedPremium } from '@/lib/premium';
@@ -91,10 +91,22 @@ export default function Settings() {
 
       <FormSection title={t('Your data')} footer={t('Our promise: your records are never locked. Everything you enter stays viewable and exportable for free, even if you cancel.')}>
         <NavRow icon="download-outline" label={t('Export all data (JSON)')} onPress={exportData} />
+        {hasBackend() && <NavRow icon="cloud-offline-outline" label={t('Delete my data on the server')} onPress={() => ask({
+          title: t('Delete my data on the server'), message: t('Removes your family membership, shared feedings, collar-tag pages and finder messages from the PetTrack server. Data on this device stays.'),
+          confirm: t('Delete'), destructive: true,
+          onConfirm: async () => {
+            try { await api('/api/devices/me', { method: 'DELETE' }); } catch (e) { toast((e as Error).message); return; }
+            const { data, replaceAll } = getState();
+            replaceAll({ ...data, pets: data.pets.map((p) => ({ ...p, publicSlug: undefined, lost: undefined })) });
+            setSettings({ deviceToken: undefined, household: { role: 'none', members: [] } });
+            toast(t('Server data deleted'));
+          },
+        })} />}
       </FormSection>
 
       <FormSection title={t('Guide')}>
         <NavRow icon="map-outline" label={t('Show the tour')} onPress={() => router.push('/tour')} />
+        <NavRow icon="shield-checkmark-outline" label={t('Disclaimer')} onPress={() => router.push({ pathname: '/disclaimer', params: { view: '1' } })} />
       </FormSection>
 
       <FormSection title={t('About')}>
@@ -104,6 +116,7 @@ export default function Settings() {
         <Row style={{ justifyContent: 'space-between' }}><T variant="sub">{t('Server')}</T><T variant="caption">{hasBackend() ? t('Connected') : t('Offline mode')}</T></Row>
       </FormSection>
 
+      {(__DEV__ || Platform.OS === 'web') && (
       <FormSection title={t('Testing')} footer={t('Only for testing before the App Store release.')}>
         <ToggleRow label={t('Simulate Premium')} value={premium} onChange={setSimulatedPremium} />
         <NavRow icon="flask-outline" label={t('Load demo data')} onPress={() => ask({
@@ -115,6 +128,7 @@ export default function Settings() {
           onConfirm: () => { getState().replaceAll({} as never); setSettings({ tourDone: false, selectedPetId: undefined }); router.dismissAll(); router.replace('/onboarding'); },
         })} />
       </FormSection>
+      )}
     </Screen>
   );
 }

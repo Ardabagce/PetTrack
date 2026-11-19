@@ -58,6 +58,8 @@ function FloatingTabBar({ state }: BarProps) {
 
 export default function TabsLayout() {
   const hasPets = useStore((s) => s.data.pets.length > 0);
+  const accepted = useStore((s) => s.settings.disclaimerAccepted);
+  if (!accepted) return <Redirect href="/disclaimer" />;
   if (!hasPets) return <Redirect href="/onboarding" />;
   return (
     <Tabs screenOptions={{ headerShown: false }} tabBar={(props) => <FloatingTabBar {...(props as unknown as BarProps)} />}>

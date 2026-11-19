@@ -8,7 +8,7 @@ export const newId = () =>
 
 const emptyCollections = (): Collections => ({
   pets: [], vaccinations: [], weights: [], visits: [], expenses: [], medications: [], slots: [], logs: [],
-  transitions: [], reminders: [], symptomCases: [], symptomEntries: [], travelPlans: [], claims: [], questions: [],
+  transitions: [], reminders: [], symptomCases: [], symptomEntries: [], travelPlans: [], claims: [], questions: [], checkins: [], bcs: [],
 });
 
 const defaultSettings: Settings = {

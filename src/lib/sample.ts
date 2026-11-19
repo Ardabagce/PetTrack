@@ -10,7 +10,7 @@ export function loadDemoData() {
   const cur = defaultCurrency();
   const luna = { ...blankPet('Luna', 'dog', 0), breed: 'Golden Retriever', birthDate: addMonths(now, -40).toISOString(), sex: 'female' as const,
     neutered: true, microchip: '985 112 004 556 781', allergies: 'Chicken protein', vetClinic: 'Riverside Animal Clinic', vetName: 'Dr. Emma Hart',
-    vetPhone: '+1 555 0142', vetEmail: 'care@riverside.vet', insuranceProvider: 'Lemonade Pet', insurancePolicy: 'LP-2291-884', targetWeightKg: 28 };
+    vetPhone: '+1 555 0142', vetEmail: 'care@riverside.vet', insuranceProvider: 'Lemonade Pet', insurancePolicy: 'LP-2291-884', targetWeightKg: 28, activity: 'normal' as const, foodKcal100g: 365 };
   const milo = { ...blankPet('Milo', 'cat', 2), breed: 'British Shorthair', birthDate: addMonths(now, -19).toISOString(), sex: 'male' as const, neutered: true, microchip: '276 098 106 223 511' };
   const caseId = newId();
   const visitId = newId();
@@ -58,6 +58,12 @@ export function loadDemoData() {
     travelPlans: [{ id: newId(), petId: luna.id, destination: 'DE', departure: d(44), arrival: d(45), done: ['airline'], notes: 'LH 431 · Berlin' }],
     claims: [{ id: newId(), petId: luna.id, visitId, insurer: 'Lemonade Pet', policy: 'LP-2291-884', claimNo: '', status: 'submitted', claimed: 145, currency: cur,
       submittedAt: d(-10), includeSymptoms: true, notes: '', createdAt: d(-10) }],
+    checkins: [
+      [6, 4, 4, 'normal', false], [5, 5, 5, 'normal', false], [4, 4, 4, 'soft', false], [3, 4, 3, 'normal', false],
+      [2, 3, 2, 'soft', true], [1, 3, 2, 'normal', false],
+    ].map(([o, energy, appetite, stool, vomit]) => ({ id: newId(), petId: luna.id, date: d(-(o as number), 20), energy: energy as number, appetite: appetite as number,
+      stool: stool as 'normal' | 'soft', vomit: vomit as boolean, note: '' })),
+    bcs: [{ id: newId(), petId: luna.id, date: d(-30), score: 6 }],
     questions: [
       { id: newId(), petId: luna.id, text: 'Should we switch to a hypoallergenic food?', createdAt: d(-3), answered: false },
       { id: newId(), petId: luna.id, text: 'Is the Leptospirosis booster overdue a problem?', createdAt: d(-1), answered: false },

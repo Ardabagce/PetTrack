@@ -23,6 +23,7 @@ export default function Nutrition() {
     <TabScreen title={t('Nutrition')}>
       <TabPetSwitcher />
       <Intake view={view} />
+      <PortionEntry view={view} />
       <FoodSafetyEntry />
       <Schedule view={view} />
       <Transition view={view} />
@@ -61,6 +62,24 @@ function Intake({ view }: { view: PetView }) {
             </Pressable>
           );
         })}
+      </Row>
+    </Card>
+  );
+}
+
+function PortionEntry({ view }: { view: PetView }) {
+  const c = useTheme();
+  const { t } = useTranslation();
+  const perMeal = view.slots.find((s) => s.enabled && s.kind === 'meal' && s.portion)?.portion;
+  return (
+    <Card onPress={() => router.push('/portions')}>
+      <Row gap={14}>
+        <IconBadge icon="calculator" tint={c.sage} size={46} />
+        <View style={{ flex: 1 }}>
+          <T variant="headline">{t('How much should {{a}} eat?', { a: view.pet!.name })}</T>
+          <T variant="caption">{perMeal ? t('Now {{a}} g per meal · recalculate from body condition', { a: perMeal }) : t('Calories and grams per meal from body condition, activity and food.')}</T>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color={c.ink3} />
       </Row>
     </Card>
   );

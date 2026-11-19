@@ -5,6 +5,7 @@ import { Image, Pressable, View } from 'react-native';
 import { LineChart, MixBar } from '@/components/extras';
 import { kindColor, kindIcon, PetHero, TabPetSwitcher } from '@/components/petParts';
 import { Card, Columns, IconBadge, IconButton, Row, T, TabScreen, useConfirm } from '@/components/ui';
+import { CheckInCard, ScoreCard } from '@/components/wellnessParts';
 import { completeReminder, conflictMessage, logFeeding } from '@/lib/actions';
 import { addDays, atTime, daysBetween, isSameDay } from '@/lib/dates';
 import { newFoodRatio, transitionDay } from '@/lib/diet';
@@ -30,7 +31,15 @@ export default function Today() {
   if (!view.pet) return null;
 
   return (
-    <TabScreen title={t(greeting)} right={<IconButton icon="settings-outline" label={t('Settings')} onPress={() => router.push('/settings')} />}>
+    <TabScreen title={t(greeting)} right={
+      <Row gap={8}>
+        <Pressable onPress={() => router.push('/sos')} accessibilityRole="button" accessibilityLabel={t('Emergency')}
+          style={{ height: 42, paddingHorizontal: 14, borderRadius: 21, backgroundColor: c.danger, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <Ionicons name="medkit" size={16} color="#fff" /><T variant="headline" color="#fff" style={{ fontSize: 14 }}>SOS</T>
+        </Pressable>
+        <IconButton icon="settings-outline" label={t('Settings')} onPress={() => router.push('/settings')} />
+      </Row>
+    }>
       <T variant="eyebrow" style={{ marginTop: -12 }}>{formatDate(new Date(), 'full')}</T>
       <TabPetSwitcher />
       {view.pet.lost?.active && (
@@ -43,8 +52,10 @@ export default function Today() {
         left={<>
           <PetHero view={view} />
           <FeedingCard view={view} />
+          <CheckInCard view={view} />
         </>}
         right={<>
+          <ScoreCard view={view} />
         {view.openSymptomCases.length > 0 && <SymptomWatch view={view} />}
         <Upcoming view={view} />
         {view.activeTransition && (

@@ -24,11 +24,12 @@ export default function FoodSafety() {
 
   return (
     <Screen title={t('Can my pet eat this?')}>
+      <Banner icon="information-circle-outline" tint={c.sky} text={t('General information from public sources, not veterinary advice. Every animal reacts differently and amounts matter. Ask your vet before feeding anything new.')} />
       <Field value={query} onChange={setQuery} placeholder={t('Search: chocolate, grapes, lilies…')} />
       <Chips>{(['dog', 'cat'] as Species[]).map((s) => <Chip key={s} label={t(cap(s))} selected={species === s} onPress={() => setSpecies(s)} />)}</Chips>
       <Card tone="danger">
         <Row><Ionicons name="call" size={18} color={c.danger} /><T variant="headline">{t('Ate something dangerous?')}</T></Row>
-        <T variant="sub">{t("Call your vet or the nearest emergency clinic right away. Don't make your pet vomit unless a vet tells you to. Keep the packaging.")}</T>
+        <T variant="sub">{t('Contact your vet or the nearest emergency clinic right away and follow their advice. Keep the packaging.')}</T>
         {lines.map((h) => (
           <Pressable key={h.id} onPress={() => Linking.openURL(`tel:${h.phone.replace(/[^\d+]/g, '')}`)} accessibilityRole="button">
             <Row style={{ justifyContent: 'space-between' }}>

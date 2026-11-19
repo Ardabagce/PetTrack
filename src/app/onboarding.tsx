@@ -13,6 +13,8 @@ export default function Onboarding() {
   const c = useTheme();
   const { t } = useTranslation();
   const hasPets = useStore((s) => s.data.pets.length > 0);
+  const accepted = useStore((s) => s.settings.disclaimerAccepted);
+  if (!accepted) return <Redirect href="/disclaimer" />;
   if (hasPets) return <Redirect href="/" />;
   const feature = (icon: keyof typeof Ionicons.glyphMap, text: string) => (
     <Row gap={12}>

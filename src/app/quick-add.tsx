@@ -30,6 +30,7 @@ export default function QuickAdd() {
 
   const go = (path: string) => { router.back(); setTimeout(() => router.push(path as never), 250); };
   const actions: { label: string; icon: keyof typeof Ionicons.glyphMap; tint: string; pro?: boolean; run: () => void }[] = [
+    { label: 'Check-in', icon: 'happy', tint: c.sage, run: () => go('/checkin') },
     { label: 'Weight', icon: 'barbell', tint: c.sage, run: () => go('/weight') },
     { label: 'Vet visit', icon: 'medical', tint: c.accent, run: () => go('/visit-edit') },
     { label: 'Scan report', icon: 'scan', tint: c.plum, pro: true, run: () => { router.back(); requirePremium('reportScanning', () => setTimeout(() => router.push('/scan'), 250)); } },
@@ -40,6 +41,8 @@ export default function QuickAdd() {
       ? (router.back(), requirePremium('unlimitedReminders', () => {})) : go('/reminder')) },
     { label: 'Is it safe?', icon: 'warning', tint: c.danger, run: () => go('/food-safety') },
     { label: 'Question for vet', icon: 'help-circle', tint: c.sage, run: () => go('/visit-prep') },
+    { label: 'Converter', icon: 'swap-horizontal', tint: c.sky, run: () => go('/converter') },
+    { label: 'SOS', icon: 'medkit', tint: c.danger, run: () => go('/sos') },
   ];
 
   return (

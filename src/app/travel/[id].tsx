@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Linking, Pressable, View } from 'react-native';
-import { Button, Card, Pill, Row, Screen, T } from '@/components/ui';
+import { Banner, Button, Card, Pill, Row, Screen, T } from '@/components/ui';
 import { daysBetween } from '@/lib/dates';
 import { countryName, formatDate } from '@/lib/format';
 import { useTranslation } from '@/lib/i18n';
@@ -44,6 +44,7 @@ export default function TravelDetail() {
           <T variant="caption" color="#F6F0E499">{t('days')}</T>
         </View>
       </LinearGradient>
+      <Banner icon="information-circle-outline" tint={c.sky} text={t('A planning aid only. Entry rules change and depend on your situation – confirm every requirement with official sources, your vet and your airline.')} />
       {steps.map((s) => {
         const state = stepState(s, plan.done.includes(s.id));
         return (
@@ -60,7 +61,7 @@ export default function TravelDetail() {
                 </Row>
                 <T variant="sub">{t(s.detail)}</T>
                 {state === 'done'
-                  ? s.autoSatisfied && <T variant="caption" color={c.sage}>{t("Found in {{a}}'s records", { a: pet.name })}</T>
+                  ? s.autoSatisfied && <T variant="caption" color={c.sage}>{t("Appears covered in {{a}}'s records – confirm with your vet", { a: pet.name })}</T>
                   : !!timing(s) && <T variant="caption" color={colors[state]}>{timing(s)}</T>}
               </View>
             </Row>

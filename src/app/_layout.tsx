@@ -58,11 +58,13 @@ export default function RootLayout() {
         <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
         <Stack.Screen name="tour" options={{ presentation: 'fullScreenModal' }} />
         <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="sos" options={{ presentation: 'fullScreenModal' }} />
+        <Stack.Screen name="disclaimer" options={{ animation: 'fade' }} />
         <Stack.Screen name="quick-add" options={{ presentation: 'formSheet', sheetAllowedDetents: [0.62, 0.9], sheetCornerRadius: 30, sheetGrabberVisible: true }} />
-        {['pet-edit', 'vaccine', 'weight', 'visit-edit', 'expense', 'reminder', 'slot', 'transition', 'claim', 'symptom-edit', 'symptom-entry', 'travel-edit', 'scan', 'settings', 'visit-prep'].map((name) => (
+        {['pet-edit', 'vaccine', 'weight', 'visit-edit', 'expense', 'reminder', 'slot', 'transition', 'claim', 'symptom-edit', 'symptom-entry', 'travel-edit', 'scan', 'settings', 'visit-prep', 'checkin', 'portions'].map((name) => (
           <Stack.Screen key={name} name={name} options={modal} />
         ))}
-        {['visit/[id]', 'symptom/[id]', 'travel/[id]', 'food-safety', 'lost', 'family'].map((name) => (
+        {['visit/[id]', 'symptom/[id]', 'travel/[id]', 'food-safety', 'lost', 'family', 'converter'].map((name) => (
           <Stack.Screen key={name} name={name} options={{ headerShown: true, title: '' }} />
         ))}
       </Stack>
