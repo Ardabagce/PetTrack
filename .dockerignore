@@ -1,0 +1,4 @@
+# Only the backend is needed in the Docker build context.
+*
+!server/requirements.txt
+!server/app.py
