@@ -97,7 +97,7 @@
     ],
     "locales": {},
     "extra": {
-      "apiUrl": "",
+      "apiUrl": "https://pettrack.bagce.dev",
       "router": {
         "asyncRoutes": {
           "web": false,
