@@ -378,3 +378,10 @@ T.update({
 "{{a}} looks to be at a healthy body condition.": ("{{a}} parece tener una condición corporal saludable.", "{{a}} scheint einen gesunden Körperzustand zu haben.", "{{a}} semble avoir un état corporel sain.", "{{a}} lijkt een gezonde lichaamsconditie te hebben."),
 "Generally low risk": ("Riesgo generalmente bajo", "Im Allgemeinen geringes Risiko", "Risque généralement faible", "Over het algemeen laag risico"),
 })
+
+T.update({
+"Appearance": ("Apariencia", "Darstellung", "Apparence", "Weergave"),
+"System": ("Sistema", "System", "Système", "Systeem"),
+"Light": ("Claro", "Hell", "Clair", "Licht"),
+"Dark": ("Oscuro", "Dunkel", "Sombre", "Donker"),
+})

@@ -7,7 +7,7 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { ActivityIndicator, AppState, View } from 'react-native';
+import { ActivityIndicator, Appearance, AppState, Platform, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { HtmlPreview } from '@/components/extras';
 import { T } from '@/components/ui';
@@ -30,6 +30,13 @@ export default function RootLayout() {
   useEffect(() => {
     if (language && i18n.language !== language) i18n.changeLanguage(language);
   }, [language]);
+
+  // Native pickers, alerts and the keyboard follow the in-app appearance choice too.
+  const themePref = useStore((s) => s.settings.theme ?? 'system');
+  useEffect(() => {
+    if (Platform.OS === 'web') return;
+    try { Appearance.setColorScheme((themePref === 'system' ? 'auto' : themePref) as never); } catch { /* older runtimes */ }
+  }, [themePref]);
 
   useEffect(() => {
     const sub = AppState.addEventListener('change', (s) => { if (s === 'active') syncHousehold().catch(() => {}); });

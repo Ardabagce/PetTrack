@@ -229,7 +229,7 @@ export function Field({ label, value, onChange, placeholder, multiline, keyboard
           autoCapitalize={keyboard === 'email-address' ? 'none' : 'sentences'}
           onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
           selectionColor={c.accent}
-          style={[{ flex: 1, minHeight: multiline ? 76 : 48, paddingVertical: 12, color: c.ink, fontFamily: big ? fonts.display : fonts.body, fontSize: big ? 30 : 16, textAlignVertical: multiline ? 'top' : 'center' },
+          style={[{ flex: 1, minWidth: 0, minHeight: multiline ? 76 : 48, paddingVertical: 12, color: c.ink, fontFamily: big ? fonts.display : fonts.body, fontSize: big ? 30 : 16, textAlignVertical: multiline ? 'top' : 'center' },
             Platform.OS === 'web' ? ({ outlineStyle: 'none', outlineWidth: 0 } as unknown as TextStyle) : null]}
         />
         {suffix && <T variant="sub">{suffix}</T>}
@@ -360,13 +360,19 @@ export function EditorHeader({ title, onSave, canSave = true, saveLabel }: { tit
     <Stack.Screen options={{
       title, headerShown: true,
       headerLeft: () => (
-        <Pressable onPress={() => router.back()} hitSlop={10} accessibilityRole="button">
-          <Text style={{ color: c.ink2, fontFamily: fonts.medium, fontSize: 16 }}>{t('Cancel')}</Text>
+        <Pressable onPress={() => router.back()} hitSlop={8} accessibilityRole="button" accessibilityLabel={t('Cancel')}
+          style={({ pressed }) => ({ width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center',
+            backgroundColor: c.surfaceMuted, opacity: pressed ? 0.7 : 1, marginLeft: Platform.OS === 'web' ? 12 : 0 })}>
+          <Ionicons name="close" size={20} color={c.ink2} />
         </Pressable>
       ),
       headerRight: onSave ? () => (
-        <Pressable onPress={onSave} disabled={!canSave} hitSlop={10} accessibilityRole="button">
-          <Text style={{ color: canSave ? c.accent : c.ink3, fontFamily: fonts.bold, fontSize: 16 }}>{saveLabel ?? t('Save')}</Text>
+        <Pressable onPress={onSave} disabled={!canSave} hitSlop={8} accessibilityRole="button" accessibilityState={{ disabled: !canSave }}
+          style={({ pressed }) => ({ height: 36, paddingHorizontal: 16, borderRadius: 18, flexDirection: 'row', alignItems: 'center', gap: 6,
+            backgroundColor: canSave ? c.accent : c.surfaceMuted, opacity: pressed ? 0.85 : 1, transform: [{ scale: pressed ? 0.97 : 1 }],
+            marginRight: Platform.OS === 'web' ? 12 : 0 })}>
+          <Ionicons name="checkmark" size={17} color={canSave ? '#fff' : c.ink3} />
+          <Text style={{ color: canSave ? '#fff' : c.ink3, fontFamily: fonts.semibold, fontSize: 15 }}>{saveLabel ?? t('Save')}</Text>
         </Pressable>
       ) : undefined,
     }} />

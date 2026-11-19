@@ -111,4 +111,5 @@ export interface Settings {
   household: { code?: string; role: 'none' | 'owner' | 'member'; members: string[]; lastSync?: ISODate };
   deviceToken?: string;
   disclaimerAccepted?: string;
+  theme?: 'system' | 'light' | 'dark';
 }

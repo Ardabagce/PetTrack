@@ -81,6 +81,12 @@ export default function Settings() {
               onPress={() => { setSettings({ language: l.code }); i18n.changeLanguage(l.code); }} />
           ))}
         </Chips>
+        <T variant="caption">{t('Appearance')}</T>
+        <Chips>
+          {([['system', 'System', 'phone-portrait-outline'], ['light', 'Light', 'sunny-outline'], ['dark', 'Dark', 'moon-outline']] as const).map(([id, label, icon]) => (
+            <Chip key={id} icon={icon} label={t(label)} selected={(settings.theme ?? 'system') === id} onPress={() => setSettings({ theme: id })} />
+          ))}
+        </Chips>
         <T variant="caption">{t('Weight unit')}</T>
         <Chips>
           {(['auto', 'kg', 'lb'] as const).map((u) => (

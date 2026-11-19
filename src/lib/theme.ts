@@ -1,4 +1,5 @@
 import { useColorScheme } from 'react-native';
+import { useStore } from './store';
 
 /** "Linen & Forest" — warm paper neutrals, deep forest ink and a terracotta accent. */
 const light = {
@@ -43,7 +44,9 @@ export const fixed = {
 export type Palette = typeof light & typeof fixed & { scheme: 'light' | 'dark' };
 
 export function useTheme(): Palette {
-  const scheme = useColorScheme() === 'dark' ? 'dark' : 'light';
+  const system = useColorScheme() === 'dark' ? 'dark' : 'light';
+  const pref = useStore((s) => s.settings.theme ?? 'system');
+  const scheme = pref === 'system' ? system : pref;
   return { ...(scheme === 'dark' ? dark : light), ...fixed, scheme };
 }
 
