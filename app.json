@@ -59,7 +59,10 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundColor": "#1D3529"
-      }
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "output": "single",
@@ -94,7 +97,23 @@
     ],
     "locales": {},
     "extra": {
-      "apiUrl": ""
+      "apiUrl": "",
+      "router": {
+        "asyncRoutes": {
+          "web": false,
+          "default": false
+        }
+      },
+      "eas": {
+        "projectId": "6c5154bb-4c46-401a-96cc-48e804faaa94"
+      }
+    },
+    "owner": "ardabagce",
+    "updates": {
+      "url": "https://u.expo.dev/6c5154bb-4c46-401a-96cc-48e804faaa94"
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
     }
   }
 }
