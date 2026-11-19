@@ -1,0 +1,83 @@
+# Builds the iOS app on a GitHub macOS runner and uploads it to TestFlight.
+#
+# Required repository secrets (Settings → Secrets and variables → Actions):
+#   EXPO_TOKEN     – Expo access token (signing credentials are stored on Expo)
+#   ASC_KEY_ID     – App Store Connect API key ID
+#   ASC_ISSUER_ID  – App Store Connect issuer ID
+#   ASC_KEY_P8     – full contents of the AuthKey_XXXX.p8 file
+#
+# Triggers:
+#   • Actions tab → "TestFlight" → Run workflow
+#   • a push whose commit message contains [testflight]          → full build + upload
+#   • a push whose commit message contains [testflight-upload]   → upload the latest finished EAS build (no rebuild)
+name: TestFlight
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "build = build on this runner, upload-eas = upload the latest finished EAS cloud build"
+        type: choice
+        options: [build, upload-eas]
+        default: build
+  push:
+    branches: ["claude/**", "main"]
+
+concurrency:
+  group: testflight
+  cancel-in-progress: false
+
+jobs:
+  testflight:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.head_commit.message, '[testflight]') ||
+      contains(github.event.head_commit.message, '[testflight-upload]')
+    runs-on: macos-latest
+    timeout-minutes: 75
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      EAS_BUILD_NO_EXPO_GO_WARNING: "true"
+      MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || (contains(github.event.head_commit.message, '[testflight-upload]') && 'upload-eas' || 'build') }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: App Store Connect API key
+        env:
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+        run: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          printf '%s\n' "$ASC_KEY_P8" > ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8
+          chmod 600 ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8
+
+      - name: Build on runner
+        if: env.MODE == 'build'
+        run: npx eas-cli@latest build -p ios --profile production --local --non-interactive --output "$RUNNER_TEMP/PetTrack.ipa"
+
+      - name: Download latest EAS build
+        if: env.MODE == 'upload-eas'
+        run: |
+          URL=$(npx eas-cli@latest build:list -p ios --status finished --buildProfile production --limit 1 --json --non-interactive | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log(JSON.parse(s)[0].artifacts.buildUrl))')
+          curl -fsSL "$URL" -o "$RUNNER_TEMP/PetTrack.ipa"
+
+      - name: Upload to TestFlight
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: xcrun altool --upload-app -t ios -f "$RUNNER_TEMP/PetTrack.ipa" --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID" --output-format normal
+
+      - name: Remove key
+        if: always()
+        run: rm -rf ~/.appstoreconnect
