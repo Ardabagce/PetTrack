@@ -79,7 +79,7 @@ enum FeedingKind: String, Codable, CaseIterable, Identifiable {
 }
 
 enum LogSource: String, Codable {
-    case manual, device, shortcut
+    case manual, device, shortcut, household
 }
 
 enum VisitSource: String, Codable {

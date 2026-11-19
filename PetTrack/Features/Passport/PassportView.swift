@@ -46,6 +46,7 @@ struct PassportView: View {
                         PassportIDCard(pet: pet) { showEditor = true }
                         shareCard(pet)
                         EmergencyCard(pet: pet)
+                        TravelCard(pet: pet)
                         vetCard(pet)
                         if !pet.insuranceProvider.isEmpty || !pet.insurancePolicy.isEmpty {
                             VStack(alignment: .leading, spacing: 12) {
@@ -89,6 +90,9 @@ struct PassportView: View {
                 if let pet { NavigationStack { PetEditorView(pet: pet) } }
             }
             .sheet(isPresented: $showSettings) { SettingsView() }
+            .navigationDestination(for: TravelPlan.self) { plan in
+                TravelPlanDetailView(plan: plan)
+            }
             .sheet(item: $exported) { file in
                 ActivityView(items: [file.url])
                     .presentationDetents([.medium, .large])

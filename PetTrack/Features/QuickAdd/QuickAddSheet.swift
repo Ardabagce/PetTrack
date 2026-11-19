@@ -48,6 +48,7 @@ struct QuickAddSheet: View {
     @Query(sort: \Pet.createdAt) private var pets: [Pet]
     @AppStorage("selectedPetID") private var selectedPetID = ""
     @State private var loggedKind: FeedingKind?
+    @State private var pendingFeeding: FeedingRequest?
 
     private var pet: Pet? { pets.selected(id: selectedPetID) }
 
@@ -106,14 +107,23 @@ struct QuickAddSheet: View {
             }
         }
         .padding(22)
+        .doubleFeedAlert($pendingFeeding, petName: pet?.name ?? "") { request in
+            commit(request.kind)
+        }
     }
 
     private func log(_ kind: FeedingKind) {
         guard let pet else { return }
-        let entry = FeedingLog(kind: kind)
-        entry.pet = pet
-        context.insert(entry)
-        try? context.save()
+        if let existing = FeedingLogger.conflict(for: pet, kind: kind) {
+            pendingFeeding = FeedingRequest(kind: kind, amount: 0, scheduleID: nil, existing: existing)
+            return
+        }
+        commit(kind)
+    }
+
+    private func commit(_ kind: FeedingKind) {
+        guard let pet else { return }
+        FeedingLogger.log(kind, for: pet, context: context)
         withAnimation { loggedKind = kind }
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
             withAnimation { if loggedKind == kind { loggedKind = nil } }

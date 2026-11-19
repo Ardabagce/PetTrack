@@ -65,7 +65,7 @@ struct RootView: View {
         .onAppear(perform: presentGuideIfNeeded)
         .onChange(of: scenePhase) { _, phase in
             guard phase == .active else { return }
-            Task { await syncFeeders() }
+            Task { await syncHousehold() }
         }
     }
 
@@ -94,11 +94,8 @@ struct RootView: View {
         }
     }
 
-    private func syncFeeders() async {
-        guard store.isPremium else { return }
-        for pet in pets where !pet.feederProviderID.isEmpty {
-            _ = try? await FeederSyncService.sync(pet: pet, context: context)
-        }
+    private func syncHousehold() async {
+        await HouseholdService.shared.sync(context: context)
     }
 }
 

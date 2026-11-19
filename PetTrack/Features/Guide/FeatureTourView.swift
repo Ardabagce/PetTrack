@@ -25,7 +25,7 @@ struct FeatureTourView: View {
              message: "Vaccines with booster reminders, a vet journal, a symptom photo diary, weight charts and every bill."),
         Page(id: 2, symbol: "fork.knife", tint: Theme.sage, eyebrow: "Nutrition",
              title: "Feeding, made routine",
-             message: "Daily meal and water times, gentle food transitions and sync with smart feeders."),
+             message: "Daily meal and water times, gentle food transitions and a quick check of which foods are safe."),
         Page(id: 3, symbol: "person.text.rectangle.fill", tint: Theme.sky, eyebrow: "Passport",
              title: "Ready when it matters",
              message: "Microchip, allergies, vet contacts and a shareable PDF passport for emergencies or a new vet."),

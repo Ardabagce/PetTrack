@@ -16,6 +16,9 @@ enum Persistence {
         Reminder.self,
         SymptomCase.self,
         SymptomEntry.self,
+        TravelPlan.self,
+        InsuranceClaim.self,
+        VetQuestion.self,
     ])
 
     /// Shared container used by the app and by App Intents (Siri / Shortcuts).

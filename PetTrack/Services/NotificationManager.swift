@@ -162,6 +162,41 @@ final class NotificationManager {
         center.removePendingNotificationRequests(withIdentifiers: ["symptom-\(symptomCase.id.uuidString)"])
     }
 
+    // MARK: Travel
+
+    /// Reminds about each travel step when its window opens and two days before its deadline.
+    func schedule(_ plan: TravelPlan, pet: Pet) {
+        cancel(plan)
+        let destination = TravelRequirements.destination(plan.destinationCode)
+        let steps = TravelRequirements.steps(to: destination, arrival: plan.arrivalDate, facts: TravelRequirements.facts(for: pet))
+        let calendar = Calendar.current
+        for step in steps where !step.autoSatisfied && !plan.isCompleted(step.id) {
+            let title = String(localized: "Trip to \(destination.name) · \(pet.name)")
+            if let start = step.windowStart, let fire = calendar.date(bySettingHour: 9, minute: 0, second: 0, of: start), fire > .now {
+                let content = UNMutableNotificationContent()
+                content.title = title
+                content.body = String(localized: "You can do this now: \(String(localized: step.title)).")
+                content.sound = .default
+                add(id: "travel-\(plan.id.uuidString)-\(step.id)-open", content: content, at: fire)
+            }
+            if let deadline = step.deadline,
+               let warn = calendar.date(byAdding: .day, value: -2, to: deadline),
+               let fire = calendar.date(bySettingHour: 9, minute: 0, second: 0, of: warn), fire > .now {
+                let content = UNMutableNotificationContent()
+                content.title = title
+                content.body = String(localized: "2 days left: \(String(localized: step.title)).")
+                content.sound = .default
+                add(id: "travel-\(plan.id.uuidString)-\(step.id)-due", content: content, at: fire)
+            }
+        }
+    }
+
+    func cancel(_ plan: TravelPlan) {
+        let stepIDs = ["microchip", "rabies", "tapeworm", "certificate", "endorsement", "airline", "age", "cdcForm", "fitToFly"]
+        let ids = stepIDs.flatMap { ["travel-\(plan.id.uuidString)-\($0)-open", "travel-\(plan.id.uuidString)-\($0)-due"] }
+        center.removePendingNotificationRequests(withIdentifiers: ids)
+    }
+
     // MARK: Pet-wide
 
     func rescheduleAll(for pet: Pet) {

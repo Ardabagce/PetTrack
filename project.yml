@@ -28,11 +28,18 @@ targets:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         ITSAppUsesNonExemptEncryption: false
+        CKSharingSupported: true
         UILaunchScreen:
           UIColorName: AccentColor
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         NSCameraUsageDescription: PetTrack uses the camera to scan vet reports and to take photos of your pet.
         NSPhotoLibraryUsageDescription: PetTrack lets you pick photos of your pet and of vet reports.
+    entitlements:
+      path: PetTrack/PetTrack.entitlements
+      properties:
+        com.apple.developer.icloud-container-identifiers: [iCloud.com.pettrack.app]
+        com.apple.developer.icloud-services: [CloudKit]
+        aps-environment: development
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.pettrack.app

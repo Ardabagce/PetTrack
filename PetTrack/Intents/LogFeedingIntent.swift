@@ -34,10 +34,13 @@ struct LogFeedingIntent: AppIntent {
         guard let pet = match ?? pets.first else {
             return .result(dialog: "Add a pet in PetTrack first.")
         }
-        let log = FeedingLog(kind: FeedingKind(rawValue: kind.rawValue) ?? .meal, source: .shortcut)
-        log.pet = pet
-        context.insert(log)
-        try context.save()
+        let feedingKind = FeedingKind(rawValue: kind.rawValue) ?? .meal
+        if let existing = FeedingLogger.conflict(for: pet, kind: feedingKind) {
+            // Don't double feed: tell the person instead of logging again.
+            let message = FeedingLogger.conflictMessage(existing, petName: pet.name)
+            return .result(dialog: "\(message)")
+        }
+        FeedingLogger.log(feedingKind, for: pet, source: .shortcut, context: context)
         return .result(dialog: "Logged for \(pet.name).")
     }
 }

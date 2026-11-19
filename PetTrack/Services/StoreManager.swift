@@ -11,18 +11,20 @@ enum FreeTier {
 }
 
 enum PremiumFeature: String, CaseIterable, Identifiable {
-    case unlimitedPets, reportScanning, symptomDiary, passportExport, dietTransition, smartFeeders, costInsights, unlimitedReminders
+    case unlimitedPets, familySharing, reportScanning, symptomDiary, travelPlanner, claimPack, passportExport, dietTransition, costInsights, unlimitedReminders
 
     var id: String { rawValue }
 
     var title: LocalizedStringResource {
         switch self {
         case .unlimitedPets: "Unlimited pets"
+        case .familySharing: "Family sharing"
+        case .travelPlanner: "US ⇄ Europe travel planner"
+        case .claimPack: "Insurance claim pack"
         case .reportScanning: "Scan vet reports"
         case .symptomDiary: "Symptom photo diary"
         case .passportExport: "Shareable health passport"
         case .dietTransition: "Food transition planner"
-        case .smartFeeders: "Smart feeder sync"
         case .costInsights: "Cost insights"
         case .unlimitedReminders: "Unlimited reminders & feeding slots"
         }
@@ -31,11 +33,13 @@ enum PremiumFeature: String, CaseIterable, Identifiable {
     var subtitle: LocalizedStringResource {
         switch self {
         case .unlimitedPets: "Keep every companion's records in one place."
+        case .familySharing: "Everyone sees who fed the pet – no more double dinners."
+        case .travelPlanner: "Every vaccine, certificate and deadline for your trip, with countdown reminders."
+        case .claimPack: "Invoice, report and symptom diary in one PDF, ready for your insurer."
         case .reportScanning: "Turn a photo of any vet report into a visit record."
         case .symptomDiary: "Track a rash, lump or limp day by day and show your vet the whole story."
         case .passportExport: "Send a complete PDF passport to any vet in one tap."
         case .dietTransition: "Day-by-day mixing plan with gentle reminders."
-        case .smartFeeders: "Import meals and water from connected devices."
         case .costInsights: "See where your money goes, month by month."
         case .unlimitedReminders: "Medication, grooming, flea & tick – never miss one."
         }
@@ -44,11 +48,13 @@ enum PremiumFeature: String, CaseIterable, Identifiable {
     var symbol: String {
         switch self {
         case .unlimitedPets: "pawprint.fill"
+        case .familySharing: "person.2.fill"
+        case .travelPlanner: "airplane"
+        case .claimPack: "doc.badge.plus"
         case .reportScanning: "doc.text.viewfinder"
         case .symptomDiary: "camera.metering.spot"
         case .passportExport: "person.text.rectangle.fill"
         case .dietTransition: "arrow.triangle.swap"
-        case .smartFeeders: "antenna.radiowaves.left.and.right"
         case .costInsights: "chart.bar.fill"
         case .unlimitedReminders: "bell.badge.fill"
         }

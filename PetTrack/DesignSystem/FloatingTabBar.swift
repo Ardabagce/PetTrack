@@ -63,17 +63,10 @@ struct FloatingTabBar: View {
         return Button {
             withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) { selection = tab }
         } label: {
-            VStack(spacing: 3) {
-                Image(systemName: isSelected ? tab.selectedSymbol : tab.symbol)
-                    .font(.system(size: 17, weight: .semibold))
-                Text(tab.title)
-                    .font(.system(size: 10, weight: .semibold))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-            }
-            .foregroundStyle(isSelected ? Theme.ink : Theme.inkTertiary)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 7)
+            Image(systemName: isSelected ? tab.selectedSymbol : tab.symbol)
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(isSelected ? Theme.ink : Theme.inkTertiary)
+                .frame(maxWidth: .infinity, minHeight: 44)
             .background {
                 if isSelected {
                     Capsule()
@@ -84,7 +77,12 @@ struct FloatingTabBar: View {
             .contentShape(Capsule())
         }
         .buttonStyle(.plain)
+        // Icons only on screen; VoiceOver and the large-content viewer still get the name.
+        .accessibilityLabel(Text(tab.title))
         .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityShowsLargeContentViewer {
+            Label { Text(tab.title) } icon: { Image(systemName: tab.selectedSymbol) }
+        }
     }
 
     private var addButton: some View {

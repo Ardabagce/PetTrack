@@ -166,6 +166,7 @@ struct PetHeroCard: View {
 struct TodayFeedingCard: View {
     let pet: Pet
     @Environment(\.modelContext) private var context
+    @State private var pendingFeeding: FeedingRequest?
 
     private var slots: [FeedingSchedule] { pet.sortedSchedules.filter(\.isEnabled) }
     private var todayLogs: [FeedingLog] { pet.logs(on: .now) }
@@ -196,6 +197,11 @@ struct TodayFeedingCard: View {
             }
         }
         .card()
+        .doubleFeedAlert($pendingFeeding, petName: pet.name) { request in
+            withAnimation(.snappy) {
+                _ = FeedingLogger.log(request.kind, for: pet, amount: request.amount, scheduleID: request.scheduleID, context: context)
+            }
+        }
     }
 
     private var completedCount: Int {
@@ -233,6 +239,9 @@ struct TodayFeedingCard: View {
                 HStack(spacing: 6) {
                     Text(Formatting.time(hour: slot.hour, minute: slot.minute))
                     if !slot.foodName.isEmpty { Text("· \(slot.foodName)") }
+                    if let done, !done.fedBy.isEmpty {
+                        Text("· \(done.fedBy)")
+                    }
                     if let done, done.source == .device {
                         Label("Device", systemImage: "antenna.radiowaves.left.and.right")
                             .labelStyle(.iconOnly)
@@ -260,15 +269,19 @@ struct TodayFeedingCard: View {
     }
 
     private func toggle(_ slot: FeedingSchedule, existing: FeedingLog?) {
-        withAnimation(.snappy) {
-            if let existing {
+        if let existing {
+            withAnimation(.snappy) {
                 context.delete(existing)
-            } else {
-                let entry = FeedingLog(kind: slot.kind, amount: slot.portion, scheduleID: slot.id)
-                entry.pet = pet
-                context.insert(entry)
+                try? context.save()
             }
-            try? context.save()
+            return
+        }
+        if let conflict = FeedingLogger.conflict(for: pet, kind: slot.kind, excludingSchedule: slot.id) {
+            pendingFeeding = FeedingRequest(kind: slot.kind, amount: slot.portion, scheduleID: slot.id, existing: conflict)
+            return
+        }
+        withAnimation(.snappy) {
+            _ = FeedingLogger.log(slot.kind, for: pet, amount: slot.portion, scheduleID: slot.id, context: context)
         }
     }
 }

@@ -35,10 +35,6 @@ final class Pet {
 
     var targetWeightKg: Double?
 
-    // Smart feeder link
-    var feederProviderID: String = ""
-    var feederLastSync: Date?
-
     var createdAt: Date = Date()
 
     @Relationship(deleteRule: .cascade, inverse: \Vaccination.pet) var vaccinations: [Vaccination]? = []
@@ -51,6 +47,12 @@ final class Pet {
     @Relationship(deleteRule: .cascade, inverse: \DietTransition.pet) var dietTransitions: [DietTransition]? = []
     @Relationship(deleteRule: .cascade, inverse: \Reminder.pet) var reminders: [Reminder]? = []
     @Relationship(deleteRule: .cascade, inverse: \SymptomCase.pet) var symptomCases: [SymptomCase]? = []
+    @Relationship(deleteRule: .cascade, inverse: \TravelPlan.pet) var travelPlans: [TravelPlan]? = []
+    @Relationship(deleteRule: .cascade, inverse: \InsuranceClaim.pet) var insuranceClaims: [InsuranceClaim]? = []
+    @Relationship(deleteRule: .cascade, inverse: \VetQuestion.pet) var vetQuestions: [VetQuestion]? = []
+
+    /// Stable ID shared with family members' devices (household feeding sync).
+    var householdPetID: String = ""
 
     init(name: String, species: Species) {
         self.name = name
@@ -109,6 +111,26 @@ final class Pet {
     }
 
     var openSymptomCases: [SymptomCase] { (symptomCases ?? []).filter { !$0.isResolved } }
+
+    var sortedClaims: [InsuranceClaim] { (insuranceClaims ?? []).sorted { $0.createdAt > $1.createdAt } }
+
+    var openQuestions: [VetQuestion] {
+        (vetQuestions ?? []).filter { !$0.isAnswered }.sorted { $0.createdAt < $1.createdAt }
+    }
+
+    var upcomingTravelPlans: [TravelPlan] {
+        (travelPlans ?? []).filter { $0.arrivalDate >= Calendar.current.startOfDay(for: .now) }.sorted { $0.arrivalDate < $1.arrivalDate }
+    }
+
+    /// Most recent vet visit, used as the baseline for visit preparation.
+    var lastVisit: VetVisit? { sortedVisits.first { $0.date <= .now } }
+
+    /// The most recent log of a kind within `window`, used to prevent double feeding.
+    func recentLog(of kind: FeedingKind, within window: TimeInterval, now: Date = .now) -> FeedingLog? {
+        (feedingLogs ?? [])
+            .filter { $0.kind == kind && abs(now.timeIntervalSince($0.date)) < window }
+            .max { $0.date < $1.date }
+    }
 
     var vaccinesNeedingAttention: [Vaccination] {
         sortedVaccinations.filter { $0.status != .upToDate }
@@ -292,6 +314,8 @@ final class FeedingLog {
     var amount: Double = 0
     var sourceRaw: String = LogSource.manual.rawValue
     var deviceName: String = ""
+    /// Name of the family member who logged it ("Who fed?").
+    var fedBy: String = ""
     /// Identifier of the event at the device vendor, used to avoid duplicate imports.
     var externalID: String = ""
     var scheduleID: UUID?
@@ -462,5 +486,95 @@ final class SymptomEntry {
         self.severity = severity
         self.note = note
         self.photoData = photoData
+    }
+}
+
+// MARK: - Travel
+
+@Model
+final class TravelPlan {
+    var id: UUID = UUID()
+    /// ISO country code of the destination ("DE", "GB", "US" …).
+    var destinationCode: String = "DE"
+    var departureDate: Date = Date()
+    var arrivalDate: Date = Date()
+    var completedStepIDs: [String] = []
+    var notes: String = ""
+    var pet: Pet?
+
+    init(destinationCode: String, departureDate: Date, arrivalDate: Date) {
+        self.destinationCode = destinationCode
+        self.departureDate = departureDate
+        self.arrivalDate = arrivalDate
+    }
+
+    func isCompleted(_ stepID: String) -> Bool { completedStepIDs.contains(stepID) }
+
+    func toggle(_ stepID: String) {
+        if let index = completedStepIDs.firstIndex(of: stepID) {
+            completedStepIDs.remove(at: index)
+        } else {
+            completedStepIDs.append(stepID)
+        }
+    }
+}
+
+// MARK: - Insurance
+
+enum ClaimStatus: String, Codable, CaseIterable, Identifiable {
+    case draft, submitted, approved, paid, denied
+    var id: String { rawValue }
+
+    var title: LocalizedStringResource {
+        switch self {
+        case .draft: "Draft"
+        case .submitted: "Submitted"
+        case .approved: "Approved"
+        case .paid: "Paid"
+        case .denied: "Denied"
+        }
+    }
+}
+
+@Model
+final class InsuranceClaim {
+    var id: UUID = UUID()
+    var createdAt: Date = Date()
+    @Relationship(deleteRule: .nullify) var visit: VetVisit?
+    var insurer: String = ""
+    var policyNumber: String = ""
+    var claimNumber: String = ""
+    var statusRaw: String = ClaimStatus.draft.rawValue
+    var amountClaimed: Double = 0
+    var amountReimbursed: Double?
+    var currencyCode: String = Formatting.defaultCurrencyCode
+    var submittedDate: Date?
+    var includeSymptomDiaries: Bool = true
+    var notes: String = ""
+    var pet: Pet?
+
+    init(visit: VetVisit?) {
+        self.visit = visit
+    }
+
+    var status: ClaimStatus {
+        get { ClaimStatus(rawValue: statusRaw) ?? .draft }
+        set { statusRaw = newValue.rawValue }
+    }
+}
+
+// MARK: - Visit preparation
+
+@Model
+final class VetQuestion {
+    var id: UUID = UUID()
+    var text: String = ""
+    var createdAt: Date = Date()
+    var isAnswered: Bool = false
+    var answer: String = ""
+    var pet: Pet?
+
+    init(text: String) {
+        self.text = text
     }
 }

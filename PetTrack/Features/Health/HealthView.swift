@@ -210,6 +210,8 @@ struct JournalSection: View {
             .buttonStyle(PressableStyle())
             .guideTip(GuideTips.scanReport)
 
+            VisitPrepCard(pet: pet)
+
             SectionHeader(title: "Visits", actionTitle: "Add") { showEditor = true }
 
             if pet.sortedVisits.isEmpty {
@@ -586,6 +588,8 @@ struct CostsSection: View {
                 }
                 .card(padding: 16)
             }
+
+            ClaimsSection(pet: pet)
         }
         .sheet(isPresented: $showEditor) {
             NavigationStack { ExpenseEditorView(pet: pet) }

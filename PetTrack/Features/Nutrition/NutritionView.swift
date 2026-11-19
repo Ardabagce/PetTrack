@@ -20,7 +20,7 @@ struct NutritionView: View {
                         IntakeCard(pet: pet)
                         ScheduleSection(pet: pet)
                         TransitionSection(pet: pet)
-                        FeederEntryCard(pet: pet)
+                        FoodSafetyCard()
                         RecentLogsSection(pet: pet)
                     }
                 }
@@ -39,6 +39,7 @@ struct IntakeCard: View {
     let pet: Pet
     @Environment(\.modelContext) private var context
     @State private var lastLogged: FeedingKind?
+    @State private var pendingFeeding: FeedingRequest?
 
     var body: some View {
         let logs = pet.logs(on: .now)
@@ -83,13 +84,19 @@ struct IntakeCard: View {
             .sensoryFeedback(.success, trigger: lastLogged)
         }
         .card()
+        .doubleFeedAlert($pendingFeeding, petName: pet.name) { commit($0.kind) }
     }
 
     private func log(_ kind: FeedingKind) {
-        let entry = FeedingLog(kind: kind)
-        entry.pet = pet
-        context.insert(entry)
-        try? context.save()
+        if let existing = FeedingLogger.conflict(for: pet, kind: kind) {
+            pendingFeeding = FeedingRequest(kind: kind, amount: 0, scheduleID: nil, existing: existing)
+            return
+        }
+        commit(kind)
+    }
+
+    private func commit(_ kind: FeedingKind) {
+        FeedingLogger.log(kind, for: pet, context: context)
         withAnimation { lastLogged = kind }
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
             withAnimation { if lastLogged == kind { lastLogged = nil } }
@@ -270,52 +277,6 @@ struct TransitionTimeline: View {
     }
 }
 
-// MARK: - Feeders entry
-
-struct FeederEntryCard: View {
-    let pet: Pet
-    @Environment(StoreManager.self) private var store
-    @State private var showFeeders = false
-
-    var body: some View {
-        Button {
-            store.requirePremium(.smartFeeders) { showFeeders = true }
-        } label: {
-            HStack(spacing: 14) {
-                IconBadge(symbol: "antenna.radiowaves.left.and.right", tint: Theme.sky, size: 46)
-                VStack(alignment: .leading, spacing: 3) {
-                    HStack(spacing: 6) {
-                        Text("Smart feeders & fountains")
-                            .font(.headline)
-                            .foregroundStyle(Theme.ink)
-                        if !store.isPremium { PremiumBadge() }
-                    }
-                    Text(connectionText)
-                        .font(.caption)
-                        .foregroundStyle(Theme.inkSecondary)
-                        .multilineTextAlignment(.leading)
-                }
-                Spacer(minLength: 0)
-                Image(systemName: "chevron.right")
-                    .font(.footnote.weight(.bold))
-                    .foregroundStyle(Theme.inkTertiary)
-            }
-            .card()
-        }
-        .buttonStyle(PressableStyle())
-        .navigationDestination(isPresented: $showFeeders) {
-            FeedersView(pet: pet)
-        }
-    }
-
-    private var connectionText: String {
-        if let provider = FeederRegistry.provider(id: pet.feederProviderID) {
-            return String(localized: "Connected: \(provider.displayName)")
-        }
-        return String(localized: "Log meals and water automatically from connected devices.")
-    }
-}
-
 // MARK: - Recent logs
 
 struct RecentLogsSection: View {
@@ -345,6 +306,11 @@ struct RecentLogsSection: View {
                             Text(log.kind.title)
                                 .font(.subheadline.weight(.medium))
                                 .foregroundStyle(Theme.ink)
+                            if !log.fedBy.isEmpty {
+                                Text(log.fedBy)
+                                    .font(.caption)
+                                    .foregroundStyle(Theme.inkSecondary)
+                            }
                             if log.source == .device {
                                 Text(log.deviceName.isEmpty ? String(localized: "Device") : log.deviceName)
                                     .font(.caption2.weight(.semibold))
