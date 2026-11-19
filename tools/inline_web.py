@@ -34,3 +34,18 @@ boot = "<script>if(!/keep=1/.test(location.search))try{var h=location.hash.slice
 html = html.replace("</body>", f"{boot}<script>{js}</script></body>")
 open(out, "w", encoding="utf-8").write(html)
 print(f"inlined {count} assets → {out} ({os.path.getsize(out)/1e6:.1f} MB)")
+
+# --artifact: emit a page fragment for claude.ai artifacts (the host adds doctype/head/body).
+if len(sys.argv) > 3 and sys.argv[3] == "--artifact":
+    root_css = """<style>
+:root{color-scheme:light dark}
+html,body{height:100%;margin:0}
+body{overflow:hidden;background:#F4EFE7}
+@media (prefers-color-scheme:dark){body{background:#0E1311}}
+#root{display:flex;height:100%;flex:1;max-width:760px;margin:0 auto;box-shadow:0 0 0 1px rgba(0,0,0,.06)}
+</style>"""
+    # Storage can be blocked in private windows: fall back to memory so the app still runs.
+    shim = "<script>try{localStorage.setItem('__t','1');localStorage.removeItem('__t')}catch(e){var m={};Object.defineProperty(window,'localStorage',{value:{getItem:function(k){return k in m?m[k]:null},setItem:function(k,v){m[k]=String(v)},removeItem:function(k){delete m[k]},clear:function(){m={}},key:function(i){return Object.keys(m)[i]||null},get length(){return Object.keys(m).length}}})}</script>"
+    fragment = f"<title>PetTrack App Preview</title>\n{root_css}\n<div id=\"root\"></div>\n{shim}\n{boot}\n<script>{js}</script>\n"
+    open(out, "w", encoding="utf-8").write(fragment)
+    print(f"artifact fragment → {out} ({os.path.getsize(out)/1e6:.1f} MB)")
