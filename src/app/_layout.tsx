@@ -12,6 +12,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { HtmlPreview } from '@/components/extras';
 import { T } from '@/components/ui';
 import { syncHousehold } from '@/lib/actions';
+import { startCompanionSync } from '@/lib/companion';
 import { initPurchases } from '@/lib/premium';
 import i18n from '@/lib/i18n';
 import { useStore } from '@/lib/store';
@@ -45,6 +46,9 @@ export default function RootLayout() {
     initPurchases();
     return () => sub.remove();
   }, []);
+
+  // Widget + Apple Watch summary (no-op outside native builds).
+  useEffect(() => { if (hydrated) startCompanionSync(); }, [hydrated]);
 
   if (!hydrated || !fontsLoaded) {
     return <View style={{ flex: 1, backgroundColor: c.canvas, alignItems: 'center', justifyContent: 'center' }}><ActivityIndicator color={c.accent} /></View>;

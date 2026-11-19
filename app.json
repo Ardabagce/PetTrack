@@ -52,6 +52,12 @@
             ]
           }
         ]
+      },
+      "appleTeamId": "GQN4W45H29",
+      "entitlements": {
+        "com.apple.security.application-groups": [
+          "group.com.pettrack.app"
+        ]
       }
     },
     "android": {
@@ -107,7 +113,8 @@
             "backgroundColor": "#0E1311"
           }
         }
-      ]
+      ],
+      "@bacons/apple-targets"
     ],
     "locales": {},
     "extra": {

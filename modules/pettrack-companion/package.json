@@ -1,0 +1,7 @@
+{
+  "name": "pettrack-companion",
+  "version": "1.0.0",
+  "description": "Shares a PetTrack summary with the home-screen widget and the Apple Watch app.",
+  "private": true,
+  "license": "UNLICENSED"
+}

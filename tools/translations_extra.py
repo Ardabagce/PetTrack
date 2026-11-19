@@ -400,3 +400,14 @@ T.update({
 "{{a}} months": ("{{a}} meses", "{{a}} Monate", "{{a}} mois", "{{a}} maanden"),
 "{{a}} years": ("{{a}} años", "{{a}} Jahre", "{{a}} ans", "{{a}} jaar"),
 })
+
+T.update({
+"All done for today": ("Todo listo por hoy", "Für heute alles erledigt", "Tout est fait pour aujourd'hui", "Alles gedaan voor vandaag"),
+"No feeding times yet": ("Aún no hay horarios de comida", "Noch keine Fütterungszeiten", "Pas encore d'horaires de repas", "Nog geen voedertijden"),
+"Open PetTrack to add your pet": ("Abre PetTrack para añadir tu mascota", "Öffne PetTrack, um dein Tier hinzuzufügen", "Ouvrez PetTrack pour ajouter votre animal", "Open PetTrack om je huisdier toe te voegen"),
+"Last meal": ("Última comida", "Letzte Mahlzeit", "Dernier repas", "Laatste maaltijd"),
+"Last water": ("Último cambio de agua", "Zuletzt Wasser", "Dernière eau", "Laatste water"),
+"Not logged yet": ("Sin registros aún", "Noch nicht erfasst", "Pas encore noté", "Nog niet geregistreerd"),
+"Vaccine due": ("Vacuna pendiente", "Impfung fällig", "Vaccin à faire", "Vaccinatie gepland"),
+"Mark done": ("Marcar como hecho", "Als erledigt markieren", "Marquer comme fait", "Markeer als gedaan"),
+})
