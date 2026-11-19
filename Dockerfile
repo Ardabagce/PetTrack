@@ -9,7 +9,10 @@ COPY server/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY server/app.py .
 COPY server/site ./site
-ENV DATA_DIR=/data
+ENV DATA_DIR=/data \
+    CONTACT_EMAIL="arda@bagce.dev" \
+    OPERATOR="Arda Bagce" \
+    HOSTING="Hetzner, Germany (EU)"
 VOLUME ["/data"]
 EXPOSE 8000
 HEALTHCHECK CMD python -c "import urllib.request;urllib.request.urlopen('http://localhost:8000/health')"

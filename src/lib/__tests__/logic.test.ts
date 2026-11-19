@@ -3,7 +3,7 @@ import { newFoodRatio, transitionPhases } from '../diet';
 import { amountIn, normalizeNumber, parseReport, weightIn, firstDate } from '../parser';
 import { destination, stepState, travelSteps } from '../travel';
 import { searchFoods, levelFor, FOOD_ITEMS } from '../foodSafety';
-import { addDays } from '../dates';
+import { addDays, daysBetween } from '../dates';
 
 describe('diet transition', () => {
   it('follows 25/50/75/100 over 7 days', () => {
@@ -88,7 +88,7 @@ describe('travel planner', () => {
     expect(steps.map((s) => s.id)).toEqual(['microchip', 'rabies', 'tapeworm', 'certificate', 'endorsement', 'airline']);
     expect(steps[0].autoSatisfied).toBe(true);
     const cert = steps.find((s) => s.id === 'certificate')!;
-    expect(Math.round((arrival.getTime() - cert.windowStart!.getTime()) / 86_400_000)).toBe(10);
+    expect(daysBetween(cert.windowStart!, arrival)).toBe(10);
     expect(stepState(cert, false)).toBe('upcoming');
   });
   it('no tapeworm for cats or Germany', () => {
