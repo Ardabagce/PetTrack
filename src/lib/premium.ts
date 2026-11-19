@@ -38,10 +38,10 @@ export interface Plan { id: 'monthly' | 'yearly'; price: number; currency: strin
 
 /**
  * Purchases go through RevenueCat (StoreKit on iOS). Configure in App Store Connect + RevenueCat:
- * entitlement "premium", products pettrack_premium_monthly / pettrack_premium_yearly with a 3-day free trial,
+ * entitlement "pettrack_pro", products pettrack_premium_monthly / pettrack_premium_yearly with a 3-day free trial,
  * packages $rc_monthly / $rc_annual in the current offering. See docs/STORE_SETUP.md.
  */
-export const ENTITLEMENT = 'premium';
+export const ENTITLEMENT = 'pettrack_pro';
 const RC_IOS_KEY: string =
   (process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY as string | undefined) ||
   ((Constants.expoConfig?.extra as { revenueCatIosKey?: string } | undefined)?.revenueCatIosKey ?? '');

@@ -20,9 +20,16 @@
 5. **Users and Access → Integrations → In-App Purchase** key (for RevenueCat) and **App Store Connect API**
    key with "App Manager" role (for EAS Build/Submit). Download both .p8 files.
 
-## 2. RevenueCat
+## 2. RevenueCat (done via API on 19 Nov 2026)
+Project `projb5c3510d` "PetTrack": App Store app `app414ee2a7df` (bundle `com.pettrack.app`), products
+`pettrack_premium_monthly` / `pettrack_premium_yearly`, entitlement `pettrack_pro`, offering `default`
+with `$rc_monthly` / `$rc_annual`. Public iOS key is in `app.json → extra.revenueCatIosKey`.
+Still needed in the RevenueCat dashboard: App Store app → upload the **In-App Purchase key (.p8)** so RevenueCat
+can validate purchases.
+
+Original manual steps, for reference:
 1. New project "PetTrack" → add **App Store** app with bundle ID `com.pettrack.app`, upload the In-App Purchase key.
-2. **Entitlements**: `premium` – attach both products.
+2. **Entitlements**: `pettrack_pro` – attach both products.
 3. **Offerings**: `default` (current) with packages **$rc_monthly** → `pettrack_premium_monthly`
    and **$rc_annual** → `pettrack_premium_yearly`.
 4. Copy the **public iOS SDK key** (starts with `appl_`) and give it to Claude – it is safe to put in the app.
