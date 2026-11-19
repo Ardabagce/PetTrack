@@ -49,3 +49,13 @@ Original manual steps, for reference:
 | Health, location, contacts, identifiers, usage data, diagnostics | No | – | – | – |
 
 Everything else (records, documents, reminders) stays on the device.
+
+## App Store Connect – done via API (Nov 2026)
+
+- Subscription group **PetTrack Premium** (id 22597028), localized en-US/es-ES/de-DE/fr-FR/nl-NL.
+- `pettrack_premium_monthly` (6836920254) – 1 month, $4.99 · `pettrack_premium_yearly` (6836920268) – 1 year, $34.99.
+- Prices set in all 175 territories (Apple equalized from the USA price), available in all territories incl. new ones.
+- Introductory offer: 3-day free trial in every territory.
+- Review screenshot (paywall) uploaded → both subscriptions are **Ready to Submit**.
+- First subscriptions must be attached to the first app version in App Store Connect ("In-App Purchases and Subscriptions" section of the version page) when submitting for review.
+- EAS credentials (distribution certificate + App Store provisioning profile) created and stored on Expo servers.
