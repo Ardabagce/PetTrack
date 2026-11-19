@@ -1,0 +1,44 @@
+{
+  "identifier" : "6A1F2C3D",
+  "nonRenewingSubscriptions" : [ ],
+  "products" : [ ],
+  "settings" : { "_failTransactionsEnabled" : false, "_locale" : "en_US", "_storefront" : "USA", "_storeKitErrors" : [ ] },
+  "subscriptionGroups" : [
+    {
+      "id" : "21500001",
+      "localizations" : [ ],
+      "name" : "PetTrack Premium",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [ ], "codeOffers" : [ ],
+          "displayPrice" : "4.99",
+          "familyShareable" : true,
+          "groupNumber" : 1,
+          "internalID" : "6740000001",
+          "introductoryOffer" : { "internalID" : "6740000011", "paymentMode" : "free", "subscriptionPeriod" : "P3D" },
+          "localizations" : [ { "description" : "All Premium features, billed monthly", "displayName" : "Premium Monthly", "locale" : "en_US" } ],
+          "productID" : "com.pettrack.premium.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Premium Monthly",
+          "subscriptionGroupID" : "21500001",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [ ], "codeOffers" : [ ],
+          "displayPrice" : "34.99",
+          "familyShareable" : true,
+          "groupNumber" : 1,
+          "internalID" : "6740000002",
+          "introductoryOffer" : { "internalID" : "6740000012", "paymentMode" : "free", "subscriptionPeriod" : "P3D" },
+          "localizations" : [ { "description" : "All Premium features, billed yearly", "displayName" : "Premium Yearly", "locale" : "en_US" } ],
+          "productID" : "com.pettrack.premium.yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Premium Yearly",
+          "subscriptionGroupID" : "21500001",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : { "major" : 3, "minor" : 0 }
+}
